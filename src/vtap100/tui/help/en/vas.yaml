@@ -31,9 +31,21 @@ fields:
       Slot 0 means automatic detection.
 
   merchant_url:
-    title: Merchant URL
+    title: Merchant URL (Signup URL)
     description: |
-      Optional URL for pass presentation.
-      Used for some pass types.
+      Optional signup URL shown to users who tap but don't have
+      the pass installed yet.
+
+      When a user taps their iPhone/Apple Watch and no matching
+      pass is found, a notification appears directing them to
+      this URL where they can sign up and add the pass.
     required: false
-    example: "https://example.com/pass"
+    format: "Must be https://, max 64 bytes"
+    example: "https://example.com/loyalty/signup"
+    tip: |
+      Use case: A customer without your loyalty pass taps
+      the reader and gets a "Join our rewards" notification.
+      Tapping it opens your signup page.
+
+      Works in VAS FULL mode (pass reading + signup) or
+      URL-only mode (signup terminal only).
