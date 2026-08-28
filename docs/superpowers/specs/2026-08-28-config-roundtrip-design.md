@@ -106,6 +106,10 @@ configurations to test against.
 3. Validation constraints match the manufacturer specification.
 4. The test suite owns a fixture corpus of real configurations, and a test that
    fails when any setting is lost.
+5. The corpus is extensible without touching test code, and can be pointed at
+   private deployment files that are never committed.
+6. A user can find out what a load/save cycle would do to their own file,
+   without running the test suite.
 
 ## 4. Non-goals
 
@@ -143,8 +147,8 @@ is a possible follow-up, not part of this work.
 ### 5.2 Fixture infrastructure
 
 `tests/fixtures/` is created with the three subdirectories `tests/conftest.py`
-already promises, making the four existing fixtures functional rather than
-deleting them.
+already promises — making its four dead fixtures functional rather than deleting
+them — plus a git-ignored fourth for private files.
 
 ```
 tests/fixtures/
@@ -164,9 +168,42 @@ tests/fixtures/
 │   ├── desfire_keynum_16.txt
 │   ├── vas_keyslot_7.txt
 │   └── vas_merchant_id_no_prefix.txt
-└── expected_outputs/
-    └── full_vas_st_desfire.txt       # canonical generator output
+├── expected_outputs/
+│   └── full_vas_st_desfire.txt       # canonical generator output
+└── local_configs/                    # git-ignored, developer-private
+    └── (real deployment files, never committed)
 ```
+
+### 5.2.1 A corpus that grows
+
+The corpus is addressed by glob, never by a list in test code. Adding a
+configuration to `valid_configs/` is sufficient to subject it to the full
+round-trip battery; no test file is touched. This is the mechanism by which the
+corpus grows as new deployments surface new syntax.
+
+`local_configs/` is git-ignored and holds real, un-anonymised files. The same
+battery runs over it when the directory exists and is skipped entirely when it
+does not, so a fresh clone and CI are unaffected. This lets a developer point the
+full test suite at genuine deployment files — the ones that actually expose
+defects — without those files ever entering the repository.
+
+Anonymised configurations are welcome in `valid_configs/`. To make that safe and
+repeatable, anonymisation is a command rather than manual editing:
+
+```
+vtap100 anonymize CONFIG.TXT -o tests/fixtures/valid_configs/my_reader.txt
+```
+
+It replaces deployment identifiers — VAS merchant IDs, Smart Tap collector IDs,
+DESFire AIDs, and hex blobs inside comments — with structurally equivalent
+placeholders, preserving lengths, formats, ordering and comments so the file
+keeps its full test value. It prints every substitution it made, and refuses to
+write if it encounters a `-----BEGIN` block, so key material cannot be laundered
+into a fixture by accident.
+
+Hand-anonymising a file for a public repository is the kind of task where one
+missed identifier is permanent. The command is small; the failure mode it
+prevents is not.
 
 The flagship fixture preserves the structure, ordering, blank lines and comments
 of the original file exactly. Only deployment identifiers are replaced:
@@ -209,6 +246,11 @@ Idempotence is unaffected: the second cycle sees the already-normalised form.
 
 `test_roundtrip_preserves_all_settings` is the test that would have caught every
 defect in section 2.2. It is the centre of this work.
+
+The same battery is parametrised a second time over `local_configs/`. When the
+directory is absent — a fresh clone, CI — the parametrisation yields no cases
+and the tests report as skipped rather than passing vacuously, so an empty
+private corpus is never mistaken for a green one.
 
 **`tests/integration/test_invalid_configs.py`**, parametrised over
 `invalid_configs/`, asserts `ValidationError` naming the expected field — not
@@ -306,6 +348,28 @@ and help texts are added to `tui/help/{de,en}/*.yaml` and
 
 `KBDelayMS` input carries `min=5, max=255` per section 5.1.
 
+### 5.6.1 CLI: round-trip inspection
+
+The round-trip comparison is not only a test concern. Users hold configuration
+files this tool silently mangles today, and they have no way to find out. The
+comparison therefore becomes a product feature:
+
+```
+vtap100 validate --roundtrip config.txt
+```
+
+It parses the file, regenerates it, and reports which settings would be lost or
+altered by a load/save cycle — exit code non-zero when anything is. Without the
+flag, `validate` behaves exactly as it does now, so no existing invocation
+changes.
+
+Two new commands share one implementation with the test battery: the comparison
+logic lives in `src/vtap100/roundtrip.py` and is imported by both the CLI and
+`test_fixture_configs.py`. The tests must not carry their own copy — a divergence
+between what the tests check and what the tool reports would defeat the purpose.
+
+`vtap100 anonymize` (section 5.2.1) is the second new command.
+
 ### 5.7 Documentation
 
 Mandatory in the same branch, per `CLAUDE.md`:
@@ -317,19 +381,24 @@ Mandatory in the same branch, per `CLAUDE.md`:
 - `docs/configuration/keyboard.md` — the nine newly supported settings
 - `docs/configuration/led_beep.md` — short forms
 - `docs/api.md` — the `0-6 (0=auto)` comments become correct again
-- `docs/references/cli.md` and the tables in the `vtap100 docs` command
+- `docs/references/cli.md` — the two new commands, `validate --roundtrip` and
+  `anonymize`, and the tables in the `vtap100 docs` command
   (`cli.py` lines 575, 586) — currently state `0-6 (0=auto)` while the model
   enforces `1-6`
 - `docs/references/sources.md` — the manufacturer pages cited in section 9 as
   the authority for every range
-- `docs/troubleshooting.md` — the non-goals of section 4 as known limitations
+- `docs/development.md` — how to add a configuration to the corpus, and how to
+  use `local_configs/` for private deployment files
+- `docs/troubleshooting.md` — the non-goals of section 4 as known limitations,
+  and `validate --roundtrip` as the way to detect loss in an existing file
 - `CHANGELOG.md` — created; the breaking changes of section 6
 
 ### 5.8 `.gitignore`
 
-`*.pem`, `*.key`, `appkey*.txt` and a case-insensitive `config.txt` pattern.
-The repository is public and its subject matter is key slots; users will place
-exactly these files beside the checkout.
+`*.pem`, `*.key`, `appkey*.txt`, `tests/fixtures/local_configs/` and a
+case-insensitive `config.txt` pattern. The repository is public and its subject
+matter is key slots; users will place exactly these files beside the checkout,
+and the private corpus of section 5.2.1 must never be committable by accident.
 
 ## 6. Breaking changes
 
@@ -355,6 +424,11 @@ The work is complete when:
 3. `pytest` passes with coverage at or above the existing 93% threshold.
 4. `ruff check`, `ruff format --check` and `mypy src/` are clean.
 5. Every documentation file in section 5.7 is updated.
+6. `vtap100 validate --roundtrip` reports no loss for every valid fixture, and
+   reports the expected loss for a file crafted to trigger it.
+7. Dropping a new file into `valid_configs/` subjects it to the full battery
+   with no change to any test file.
+8. `vtap100 anonymize` refuses a file containing a `-----BEGIN` block.
 
 ## 8. Risks
 
