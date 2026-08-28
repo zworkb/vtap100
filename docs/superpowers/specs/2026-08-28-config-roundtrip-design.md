@@ -21,6 +21,23 @@ After working around that single blocker, a load/save cycle over the same file
 preserves **25 of 31 settings**. Eleven are dropped, five reappear under
 different names.
 
+This is not one unlucky file. Measured across 17 real deployment configurations:
+**14 fail to parse**, all on the same `file_id` constraint; the three that load
+lose 7 of 17 settings each. Not one survives intact.
+
+The manufacturer's own published example, `vtapnfc.com/downloads/config.txt`,
+loses **11 of its 19 settings**:
+
+```
+VERLOREN: ST1CollectorID, ST1KeySlot, ST1KeyVersion, NFCType2,
+          KBDelayMS, KBPassMode, TagLED, TagBeep,
+          ComPortEnable, ComPortMode, ComPortSource
+```
+
+The three `ST1` lines are not truly dropped — the shared VAS/Smart Tap counter
+renumbers them to `ST2`, which is the slot defect of section 2.2 reproduced on
+the vendor's own reference file.
+
 The root cause is a validation and parser layer built from the repository's own
 documentation rather than from the manufacturer specification. Every constraint
 below was verified against `help.vtapnfc.com` (see section 9).
@@ -84,7 +101,17 @@ wired up.
 
 **`NFCType#` numeric aliases are rejected.** The manufacturer documents "=U or
 =1", "=N or =2", "=B or =3". The regex accepts only `[0UNBDP]`, so `NFCType4=1`
-is silently discarded.
+is silently discarded — a form the vendor's own sample file uses.
+
+**Un-numbered DESFire settings are unsupported.** Only `DESFire1AppID` and
+friends have regexes. The un-numbered single-read spelling — `DESFireAppID`,
+`DESFireKeySlot`, `DESFireKeyDiversification` — is used throughout the DESFire
+material in `heidi.ecp2` and is not recognised.
+
+**Serial port settings are unsupported.** `ComPortEnable`, `ComPortMode` and
+`ComPortSource` have no regex, no model field and no generator output. They
+appear in the vendor's sample file. `ComPortSource` carries the same bitmask as
+`KBSource`, so `KBSourceBuilder` applies unchanged.
 
 ### 2.3 Missing test infrastructure
 
@@ -119,7 +146,8 @@ Out of scope, documented as known limitations in `docs/troubleshooting.md`:
   and `LEDDefaultRGB=FFFFFF:seq.comet@leds.ini`. Supporting these requires the
   LED and beep models to become a union of inline sequences and file references,
   plus a relationship to `leds.ini`/`beeps.ini`. Its own spec.
-- **Bluetooth, OSDP, MIFARE Classic settings.** Untouched by this work.
+- **Bluetooth, OSDP, MIFARE Classic settings.** Untouched by this work. Serial
+  port settings are in scope only because the vendor sample uses them.
 - The `_help_content:` dead blocks and the `HelpLoader` exception swallowing
   identified in an earlier review. Unrelated to round-trip fidelity.
 
@@ -127,8 +155,11 @@ Out of scope, documented as known limitations in `docs/troubleshooting.md`:
 
 ### 5.1 Validation philosophy: tolerant read, strict create
 
-Real files contain values outside the documented ranges. The flagship fixture
-has `KBDelayMS=2`, below the documented minimum of 5, and the reader accepts it.
+Real files contain values outside the documented ranges — including the
+manufacturer's own. `KBDelayMS=2` sits below the documented minimum of 5, and it
+appears both in the deployment fixtures and in `vtapnfc.com/downloads/config.txt`
+itself. Tolerance here is not indulgence towards one generator; it is what it
+takes to load the vendor's own reference file.
 
 Therefore:
 
@@ -153,7 +184,11 @@ them — plus a git-ignored fourth for private files.
 ```
 tests/fixtures/
 ├── valid_configs/                    # must parse without error
-│   ├── full_vas_st_desfire.txt       # flagship: real deployment, anonymised
+│   ├── full_vas_st_desfire.txt       # shape A: VAS+ST+DESFire+Access, slots 2 and 3
+│   ├── single_slot_all.txt           # shape B: same, one pass slot
+│   ├── access_no_vas.txt             # shape C: ST+DESFire+Access, no VAS
+│   ├── passes_only.txt               # shape D: VAS+ST, no DESFire/Access
+│   ├── vendor_sample.txt             # manufacturer's published example
 │   ├── vas_keyslot_omitted.txt       # KeySlot absent (manufacturer: valid)
 │   ├── vas_keyslot_zero.txt          # KeySlot=0 (auto key selection)
 │   ├── desfire_diversification.txt   # variants 0/1/3/5/7
@@ -173,6 +208,27 @@ tests/fixtures/
 └── local_configs/                    # git-ignored, developer-private
     └── (real deployment files, never committed)
 ```
+
+The 17 real configurations available reduce to **four distinct shapes**, and the
+corpus carries one anonymised representative of each rather than seventeen near
+duplicates. `vendor_sample.txt` is `vtapnfc.com/downloads/config.txt`, retained
+verbatim with a provenance comment and retrieval date; it contains no deployment
+data and is the only file exercising `NFCType2=1` and the `ComPort` settings.
+
+Each fixture preserves the structure, ordering, blank lines and comments
+of its original exactly. Only deployment identifiers are replaced:
+
+| Original | Fixture |
+|---|---|
+| `pass.de.h-da.library-card` | `pass.com.example.library-card` |
+| Collector ID `19091018` | `12345678` |
+| AID `D011F1` | `AABBCC` |
+| SysID `48454944495F7379735F313030303030` | `4558414D504C455F7379735F31303030` |
+| Profile `desfire_ana-u_v1` | `desfire_example_v1` |
+
+No key material enters the repository. The `.pem` and `appkey*.txt` files that
+accompany a real deployment are not fixtures and never will be. `.gitignore`
+gains `*.pem`, `*.key` and `appkey*.txt` as part of this work.
 
 ### 5.2.1 A corpus that grows
 
@@ -204,21 +260,6 @@ into a fixture by accident.
 Hand-anonymising a file for a public repository is the kind of task where one
 missed identifier is permanent. The command is small; the failure mode it
 prevents is not.
-
-The flagship fixture preserves the structure, ordering, blank lines and comments
-of the original file exactly. Only deployment identifiers are replaced:
-
-| Original | Fixture |
-|---|---|
-| `pass.de.h-da.library-card` | `pass.com.example.library-card` |
-| Collector ID `19091018` | `12345678` |
-| AID `D011F1` | `AABBCC` |
-| SysID `48454944495F7379735F313030303030` | `4558414D504C455F7379735F31303030` |
-| Profile `desfire_ana-u_v1` | `desfire_example_v1` |
-
-No key material enters the repository. The `.pem` and `appkey*.txt` files that
-accompany a real deployment are not fixtures and never will be. `.gitignore`
-gains `*.pem`, `*.key` and `appkey*.txt` as part of this work.
 
 ### 5.3 Test layers
 
@@ -272,9 +313,27 @@ file_id:          int | None = Field(default=None, ge=0, le=255)   # was ge=1
 key_num:          int | None = Field(default=None, ge=0, le=15)    # was unchecked
 sysid_key_slot:   int | None = Field(default=None, ge=0, le=9)     # was unchecked
 privacy_key_slot: int | None = Field(default=None, ge=1, le=9)     # was unchecked
-diversification:  int | None = Field(default=None)                 # was bool
-    # validator: value in {0, 1, 3, 5, 7}
+diversification:  int | None = Field(default=None, ge=0, le=7)     # was bool
+    # validator: v == 0 or v & 0b001  -- see below
 ```
+
+`DESFire#Diversification` is a **bit field**, not an enumeration:
+
+```
+Bit 0 = AN10922 diversification active
+Bit 1 = omit the AID from the diversification input
+Bit 2 = reverse UID byte order
+```
+
+The valid values 0, 1, 3, 5 and 7 are therefore "zero, or bit 0 set" — 2, 4 and
+6 would be modifiers on a disabled feature. The validator states exactly that
+rather than hardcoding a set of five magic numbers, and a `DiversificationBuilder`
+mirrors the existing `KBSourceBuilder` so the two bitmask settings in this
+codebase are expressed the same way.
+
+Choosing the wrong mode does not fail loudly: the reader computes a different
+diversified key and authentication simply fails. That is what makes the current
+silent coercion of 3/5/7 to `False` dangerous rather than merely lossy.
 
 `src/vtap100/models/vas.py` and `smarttap.py`:
 
@@ -323,6 +382,12 @@ New model for Apple Access, following the existing per-section model pattern:
   normalising to the existing letter values. The generator continues to emit the
   letter form.
 - **Apple Access.** Three regexes, model wiring, generator section.
+- **Un-numbered DESFire settings.** The existing `DESFire(\d+)` regexes gain an
+  optional index, with the un-numbered spelling mapping to index 1. The generator
+  keeps emitting the numbered form, so this is a read-side alias only.
+- **Serial port.** `ComPortEnable`, `ComPortMode`, `ComPortSource` as a
+  `ComPortConfig` model. `ComPortSource` reuses `KBSourceBuilder` rather than
+  restating the bitmask — the same eight bits with the same meanings.
 - **Jinja template.** `generator.py` line 33 and 40 emit
   `KeySlot={{ passinfo.slot }}`, which hardcodes key slot equal to pass slot.
   Corrected to `{{ passinfo.apple.key_slot }}` / `{{ passinfo.google.key_slot }}`.
@@ -330,16 +395,20 @@ New model for Apple Access, following the existing per-section model pattern:
 
 ### 5.6 TUI changes
 
-`diversification` is currently a `Switch` in `forms/desfire.py`. With five valid
-values it becomes a `Select`:
+`diversification` is currently a `Switch` in `forms/desfire.py`. Because the
+setting is a bit field (section 5.4), it becomes **three checkboxes** rather than
+a five-item dropdown, so the UI mirrors the semantics instead of enumerating
+their combinations:
 
-| Value | Label (EN) | Label (DE) |
-|---|---|---|
-| 0 | Off | Aus |
-| 1 | AN10922 (UID + AID) | AN10922 (UID + AID) |
-| 3 | Without AID | Ohne AID |
-| 5 | Reversed byte order | Byte-Reihenfolge umgekehrt |
-| 7 | Without AID, reversed | Ohne AID, umgekehrt |
+| Checkbox | Bit | Label (EN) | Label (DE) |
+|---|---|---|---|
+| active | 0 | Key diversification (AN10922) | Schlüssel-Diversifikation (AN10922) |
+| omit AID | 1 | Omit AID from input | AID nicht einbeziehen |
+| reverse UID | 2 | Reverse UID byte order | UID-Byte-Reihenfolge umkehren |
+
+The latter two are disabled while bit 0 is clear, which is what makes the
+invalid values 2, 4 and 6 unreachable through the UI. This follows the pattern
+`KBSource` already uses in this codebase.
 
 New keyboard fields get form inputs in `forms/keyboard.py`; Apple Access gets a
 new section, sidebar entry and form following the existing pattern. All labels
@@ -369,6 +438,23 @@ logic lives in `src/vtap100/roundtrip.py` and is imported by both the CLI and
 between what the tests check and what the tool reports would defeat the purpose.
 
 `vtap100 anonymize` (section 5.2.1) is the second new command.
+
+### 5.6.2 What validation must not enforce
+
+Two plausible-looking rules would be wrong, and both are contradicted by working
+deployments:
+
+- **Apple Access does not exclude Apple VAS.** The manufacturer's wording
+  ("when `AccessTCI` is used the reader will operate in ECP2 mode") reads like a
+  mode switch, but configurations running in production carry VAS, Smart Tap and
+  Access simultaneously in one file. No validation may treat `AccessTCI` as
+  disabling the pass sections.
+- **Key slots are not unique across sections.** `VAS2KeySlot=2`, `ST2KeySlot=2`
+  and `DESFire1KeySlot=2` legitimately coexist, all referring to the same
+  `appkey2.txt`. Uniqueness must not be enforced.
+
+Both are covered by fixtures rather than left as prose: shape A and shape B
+exercise the first, and shape B the second.
 
 ### 5.7 Documentation
 
@@ -429,6 +515,9 @@ The work is complete when:
 7. Dropping a new file into `valid_configs/` subjects it to the full battery
    with no change to any test file.
 8. `vtap100 anonymize` refuses a file containing a `-----BEGIN` block.
+9. `vendor_sample.txt` — the manufacturer's published example — round-trips with
+   zero loss. It loses 11 of 19 settings today and is the single clearest
+   measure of whether this work succeeded.
 
 ## 8. Risks
 
@@ -464,3 +553,15 @@ Every value range in this spec is quoted from the manufacturer documentation:
   — AccessTCI 3-byte hex, AccessAuthRequired 0/1, ECP2Mode t/a
 - [NFC card or tag settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-Card-Tag-settings.htm)
   — TagReadFormat a/d/h, NFCType2/4/5 numeric aliases
+- [Manufacturer sample config.txt](https://www.vtapnfc.com/downloads/config.txt)
+  — the reference file behind `vendor_sample.txt`; source of `KBDelayMS=2`,
+  `NFCType2=1` and the `ComPort` settings
+
+Internal, in the sibling repository `heidi.ecp2`:
+
+- `docs/desfire/tutorial-desfire-grundlagen.md` §5.2 — the Diversification bit
+  field (bit 0 active, bit 1 omit AID, bit 2 reverse UID) and why a wrong mode
+  fails silently
+- `docs/desfire/vtap-vas+access.md` — empirical proof that VAS, Smart Tap and
+  Apple Access coexist in one running configuration, and that key slots are
+  shared across sections
