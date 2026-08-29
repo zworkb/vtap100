@@ -201,19 +201,19 @@ class ConfigParser:
     TAG_READ_MIN_DIGITS = re.compile(r"^TagReadMinDigits=(\d+|A)$")
 
     # DESFire patterns
-    DESFIRE_APP_ID = re.compile(r"^DESFire(\d+)AppID=([A-Fa-f0-9]{6})$")
-    DESFIRE_FILE_ID = re.compile(r"^DESFire(\d+)FileID=(\d+)$")
-    DESFIRE_KEY_NUM = re.compile(r"^DESFire(\d+)KeyNum=(\d+)$")
-    DESFIRE_KEY_SLOT = re.compile(r"^DESFire(\d+)KeySlot=(\d+)$")
-    DESFIRE_CRYPTO = re.compile(r"^DESFire(\d+)Crypto=(\d+)$")
-    DESFIRE_FORMAT = re.compile(r"^DESFire(\d+)Format=(\d+)$")
-    DESFIRE_READ_LENGTH = re.compile(r"^DESFire(\d+)ReadLength=(\d+)$")
-    DESFIRE_READ_OFFSET = re.compile(r"^DESFire(\d+)ReadOffset=(\d+)$")
-    DESFIRE_DIVERSIFICATION = re.compile(r"^DESFire(\d+)Diversification=(\d+)$")
-    DESFIRE_PRIVACY_KEY_NUM = re.compile(r"^DESFire(\d+)PrivacyKeyNum=(\d+)$")
-    DESFIRE_PRIVACY_KEY_SLOT = re.compile(r"^DESFire(\d+)PrivacyKeySlot=(\d+)$")
-    DESFIRE_SYSID_KEY_SLOT = re.compile(r"^DESFire(\d+)SysIDKeySlot=(\d+)$")
-    DESFIRE_SYSID_LENGTH = re.compile(r"^DESFire(\d+)SysIDLength=(\d+)$")
+    DESFIRE_APP_ID = re.compile(r"^DESFire(\d*)AppID=([A-Fa-f0-9]{6})$")
+    DESFIRE_FILE_ID = re.compile(r"^DESFire(\d*)FileID=(\d+)$")
+    DESFIRE_KEY_NUM = re.compile(r"^DESFire(\d*)KeyNum=(\d+)$")
+    DESFIRE_KEY_SLOT = re.compile(r"^DESFire(\d*)KeySlot=(\d+)$")
+    DESFIRE_CRYPTO = re.compile(r"^DESFire(\d*)Crypto=(\d+)$")
+    DESFIRE_FORMAT = re.compile(r"^DESFire(\d*)Format=(\d+)$")
+    DESFIRE_READ_LENGTH = re.compile(r"^DESFire(\d*)ReadLength=(\d+)$")
+    DESFIRE_READ_OFFSET = re.compile(r"^DESFire(\d*)ReadOffset=(\d+)$")
+    DESFIRE_DIVERSIFICATION = re.compile(r"^DESFire(\d*)(?:Key)?Diversification=(\d+)$")
+    DESFIRE_PRIVACY_KEY_NUM = re.compile(r"^DESFire(\d*)PrivacyKeyNum=(\d+)$")
+    DESFIRE_PRIVACY_KEY_SLOT = re.compile(r"^DESFire(\d*)PrivacyKeySlot=(\d+)$")
+    DESFIRE_SYSID_KEY_SLOT = re.compile(r"^DESFire(\d*)SysIDKeySlot=(\d+)$")
+    DESFIRE_SYSID_LENGTH = re.compile(r"^DESFire(\d*)SysIDLength=(\d+)$")
     DESFIRE_SEPARATOR = re.compile(r"^DESFireSeparator=(.+)$")
 
     # LED patterns
@@ -309,17 +309,17 @@ class ConfigParser:
     def _parse_vas_line(self, line: str) -> bool:
         """Parse VAS-related config line."""
         if match := self.VAS_MERCHANT_ID.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_vas_data(slot).merchant_id = match.group(2)
             return True
 
         if match := self.VAS_KEY_SLOT.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_vas_data(slot).key_slot = int(match.group(2))
             return True
 
         if match := self.VAS_MERCHANT_URL.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_vas_data(slot).merchant_url = match.group(2)
             return True
 
@@ -328,17 +328,17 @@ class ConfigParser:
     def _parse_smarttap_line(self, line: str) -> bool:
         """Parse SmartTap-related config line."""
         if match := self.ST_COLLECTOR_ID.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_smarttap_data(slot).collector_id = match.group(2)
             return True
 
         if match := self.ST_KEY_SLOT.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_smarttap_data(slot).key_slot = int(match.group(2))
             return True
 
         if match := self.ST_KEY_VERSION.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_smarttap_data(slot).key_version = int(match.group(2))
             return True
 
@@ -455,67 +455,67 @@ class ConfigParser:
     def _parse_desfire_line(self, line: str) -> bool:
         """Parse DESFire-related config line."""
         if match := self.DESFIRE_APP_ID.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).app_id = match.group(2).upper()
             return True
 
         if match := self.DESFIRE_FILE_ID.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).file_id = int(match.group(2))
             return True
 
         if match := self.DESFIRE_KEY_NUM.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).key_num = int(match.group(2))
             return True
 
         if match := self.DESFIRE_KEY_SLOT.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).key_slot = int(match.group(2))
             return True
 
         if match := self.DESFIRE_CRYPTO.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).crypto = int(match.group(2))
             return True
 
         if match := self.DESFIRE_FORMAT.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).format = int(match.group(2))
             return True
 
         if match := self.DESFIRE_READ_LENGTH.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).read_length = int(match.group(2))
             return True
 
         if match := self.DESFIRE_READ_OFFSET.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).read_offset = int(match.group(2))
             return True
 
         if match := self.DESFIRE_DIVERSIFICATION.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).diversification = int(match.group(2))
             return True
 
         if match := self.DESFIRE_PRIVACY_KEY_NUM.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).privacy_key_num = int(match.group(2))
             return True
 
         if match := self.DESFIRE_PRIVACY_KEY_SLOT.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).privacy_key_slot = int(match.group(2))
             return True
 
         if match := self.DESFIRE_SYSID_KEY_SLOT.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).sysid_key_slot = int(match.group(2))
             return True
 
         if match := self.DESFIRE_SYSID_LENGTH.match(line):
-            slot = int(match.group(1))
+            slot = int(match.group(1)) if match.group(1) else 1
             self._get_desfire_app_data(slot).sysid_length = int(match.group(2))
             return True
 

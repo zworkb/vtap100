@@ -1007,3 +1007,28 @@ class TestNFCTypeAliases:
         from vtap100.roundtrip import compare
 
         assert compare("!VTAPconfig\nNFCType2=1\n").is_lossless
+
+
+class TestDESFireUnnumbered:
+    """Single-read configs omit the index: DESFireAppID, not DESFire1AppID."""
+
+    def test_unnumbered_maps_to_slot_one(self) -> None:
+        """An un-numbered setting is the first DESFire read."""
+        from vtap100.parser import parse
+
+        config = parse("!VTAPconfig\nDESFireAppID=AABBCC\nDESFireFileID=0\n")
+        assert config.desfire.apps[0].app_id == "AABBCC"
+        assert config.desfire.apps[0].file_id == 0
+
+    def test_unnumbered_diversification_is_parsed(self) -> None:
+        """DESFireKeyDiversification is the un-numbered spelling."""
+        from vtap100.parser import parse
+
+        config = parse("!VTAPconfig\nDESFireAppID=AABBCC\nDESFireKeyDiversification=5\n")
+        assert config.desfire.apps[0].diversification == 5
+
+    def test_unnumbered_roundtrips_as_numbered(self) -> None:
+        """The generator writes the numbered form; the alias table equates them."""
+        from vtap100.roundtrip import compare
+
+        assert compare("!VTAPconfig\nDESFireAppID=AABBCC\nDESFireFileID=0\n").is_lossless

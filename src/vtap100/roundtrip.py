@@ -26,6 +26,27 @@ NORMALISE: dict[str, dict[str, str]] = {
 }
 
 
+# The un-numbered DESFire spelling is the single-read form of index 1. Unlike
+# NORMALISE, which maps values, this maps the key itself: the generator always
+# writes the numbered form back.
+KEY_ALIASES: dict[str, str] = {
+    "DESFireAppID": "DESFire1AppID",
+    "DESFireFileID": "DESFire1FileID",
+    "DESFireKeySlot": "DESFire1KeySlot",
+    "DESFireKeyNum": "DESFire1KeyNum",
+    "DESFireCrypto": "DESFire1Crypto",
+    "DESFireFormat": "DESFire1Format",
+    "DESFireReadLength": "DESFire1ReadLength",
+    "DESFireReadOffset": "DESFire1ReadOffset",
+    "DESFireKeyDiversification": "DESFire1Diversification",
+    "DESFireDiversification": "DESFire1Diversification",
+    "DESFirePrivacyKeyNum": "DESFire1PrivacyKeyNum",
+    "DESFirePrivacyKeySlot": "DESFire1PrivacyKeySlot",
+    "DESFireSysIDKeySlot": "DESFire1SysIDKeySlot",
+    "DESFireSysIDLength": "DESFire1SysIDLength",
+}
+
+
 def extract_settings(text: str) -> dict[str, str]:
     """Extract the Key=Value settings from config.txt content.
 
@@ -44,7 +65,8 @@ def extract_settings(text: str) -> dict[str, str]:
         if not stripped or stripped.startswith(";") or "=" not in stripped:
             continue
         key, value = stripped.split("=", 1)
-        settings[key.strip()] = value.strip()
+        canonical = KEY_ALIASES.get(key.strip(), key.strip())
+        settings[canonical] = value.strip()
     return settings
 
 

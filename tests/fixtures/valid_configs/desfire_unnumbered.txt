@@ -1,0 +1,9 @@
+!VTAPconfig
+
+; Single-read spelling, without the index. The generator writes the
+; numbered form back, which the round-trip comparison treats as equal
+; through the key alias table.
+NFCType4=D
+DESFireAppID=AABBCC
+DESFireFileID=0
+DESFireKeySlot=2
