@@ -1,7 +1,7 @@
 """Unit tests for Apple Access configuration."""
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 
 class TestAccessConfig:
