@@ -147,7 +147,9 @@ class TestCompare:
         """
         from vtap100.roundtrip import compare
 
-        report = compare("!VTAPconfig\nVAS1MerchantID=pass.com.example.x\nBTEnable=1\n")
+        report = compare(
+            "!VTAPconfig\nVAS1MerchantID=pass.com.example.x\nVAS1KeySlot=1\nBTEnable=1\n"
+        )
         assert "BTEnable" in report.lost
         assert not report.is_lossless
 ```
@@ -159,10 +161,11 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'vtap100.roundtrip'`
 
 - [ ] **Step 3: Write the implementation**
 
-Create `src/vtap100/roundtrip.py`:
+Create `src/vtap100/roundtrip.py`. Note the `r"""` — the docstring example
+contains backslashes and ruff's D301 rule requires a raw string:
 
 ```python
-"""Round-trip fidelity comparison for VTAP100 configuration files.
+r"""Round-trip fidelity comparison for VTAP100 configuration files.
 
 Defines what "lossless" means for this project: parsing a config.txt and
 regenerating it must preserve every setting the file contains. Imported by both
