@@ -16,14 +16,14 @@ class TestAppleVASConfig:
         from vtap100.models.vas import AppleVASConfig
 
         with pytest.raises(ValidationError):
-            AppleVASConfig(key_slot=1)  # type: ignore[call-arg]
+            AppleVASConfig(slot=1, key_slot=1)  # type: ignore[call-arg]
 
     def test_vas_config_valid_minimal(self) -> None:
         """Valid VAS config with merchant_id and key_slot should be created."""
         from vtap100.models.vas import AppleVASConfig
 
         # key_slot is now required (1-6), no longer has default
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         assert config.merchant_id == "pass.com.example.test"
         assert config.key_slot == 1
 
@@ -35,13 +35,14 @@ class TestAppleVASConfig:
         """
         from vtap100.models.vas import AppleVASConfig
 
-        assert AppleVASConfig(merchant_id="pass.com.example.test").key_slot is None
+        assert AppleVASConfig(slot=1, merchant_id="pass.com.example.test").key_slot is None
 
     def test_vas_config_key_slot_zero_means_auto(self) -> None:
         """Key slot 0 selects the key automatically and is valid."""
         from vtap100.models.vas import AppleVASConfig
 
         config = AppleVASConfig(
+            slot=1,
             merchant_id="pass.com.example.test",
             key_slot=0,
         )
@@ -52,6 +53,7 @@ class TestAppleVASConfig:
         from vtap100.models.vas import AppleVASConfig
 
         config = AppleVASConfig(
+            slot=1,
             merchant_id="pass.com.example.test",
             key_slot=1,
         )
@@ -63,6 +65,7 @@ class TestAppleVASConfig:
         from vtap100.models.vas import AppleVASConfig
 
         config = AppleVASConfig(
+            slot=1,
             merchant_id="pass.com.example.test",
             key_slot=2,
             merchant_url="https://example.com/pass",
@@ -76,7 +79,7 @@ class TestAppleVASConfig:
         from vtap100.models.vas import AppleVASConfig
 
         with pytest.raises(ValidationError) as exc_info:
-            AppleVASConfig(merchant_id="com.example.test")
+            AppleVASConfig(slot=1, merchant_id="com.example.test")
 
         assert "pass." in str(exc_info.value).lower()
 
@@ -85,7 +88,7 @@ class TestAppleVASConfig:
         from vtap100.models.vas import AppleVASConfig
 
         with pytest.raises(ValidationError):
-            AppleVASConfig(merchant_id="")
+            AppleVASConfig(slot=1, merchant_id="")
 
     def test_vas_config_key_slot_valid_range(self) -> None:
         """Key slot must be between 1 and 6 (0 is no longer valid)."""
@@ -94,6 +97,7 @@ class TestAppleVASConfig:
         # Valid slots are now 1-6 only
         for slot in range(1, 7):  # 1-6
             config = AppleVASConfig(
+                slot=1,
                 merchant_id="pass.com.example.test",
                 key_slot=slot,
             )
@@ -105,6 +109,7 @@ class TestAppleVASConfig:
 
         with pytest.raises(ValidationError):
             AppleVASConfig(
+                slot=1,
                 merchant_id="pass.com.example.test",
                 key_slot=-1,
             )
@@ -115,6 +120,7 @@ class TestAppleVASConfig:
 
         with pytest.raises(ValidationError):
             AppleVASConfig(
+                slot=1,
                 merchant_id="pass.com.example.test",
                 key_slot=7,
             )
@@ -123,7 +129,7 @@ class TestAppleVASConfig:
         """Merchant URL should be optional and default to None."""
         from vtap100.models.vas import AppleVASConfig
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         assert config.merchant_url is None
 
 
@@ -134,7 +140,7 @@ class TestAppleVASConfigOutput:
         """Config should always generate both MerchantID and KeySlot lines."""
         from vtap100.models.vas import AppleVASConfig
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         lines = config.to_config_lines(slot_number=1)
 
         assert "VAS1MerchantID=pass.com.example.test" in lines
@@ -146,6 +152,7 @@ class TestAppleVASConfigOutput:
         from vtap100.models.vas import AppleVASConfig
 
         config = AppleVASConfig(
+            slot=1,
             merchant_id="pass.com.example.test",
             key_slot=1,
         )
@@ -159,6 +166,7 @@ class TestAppleVASConfigOutput:
         from vtap100.models.vas import AppleVASConfig
 
         config = AppleVASConfig(
+            slot=1,
             merchant_id="pass.com.example.test",
             key_slot=2,
             merchant_url="https://example.com/pass",
@@ -174,6 +182,7 @@ class TestAppleVASConfigOutput:
         from vtap100.models.vas import AppleVASConfig
 
         config = AppleVASConfig(
+            slot=1,
             merchant_id="pass.com.example.test",
             key_slot=3,
         )
@@ -188,7 +197,7 @@ class TestAppleVASConfigOutput:
         """to_config_lines should return a list of strings."""
         from vtap100.models.vas import AppleVASConfig
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         lines = config.to_config_lines(slot_number=1)
 
         assert isinstance(lines, list)
@@ -252,25 +261,25 @@ class TestVASKeySlotOptional:
         """A VAS config without a key slot is valid; the reader auto-selects."""
         from vtap100.models.vas import AppleVASConfig
 
-        config = AppleVASConfig(merchant_id="pass.com.example.x")
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.x")
         assert config.key_slot is None
 
     def test_key_slot_zero_is_valid(self) -> None:
         """Zero means automatic key selection."""
         from vtap100.models.vas import AppleVASConfig
 
-        assert AppleVASConfig(merchant_id="pass.com.example.x", key_slot=0).key_slot == 0
+        assert AppleVASConfig(slot=1, merchant_id="pass.com.example.x", key_slot=0).key_slot == 0
 
     def test_key_slot_seven_is_rejected(self) -> None:
         """Above the documented range is an error."""
         from vtap100.models.vas import AppleVASConfig
 
         with pytest.raises(ValidationError):
-            AppleVASConfig(merchant_id="pass.com.example.x", key_slot=7)
+            AppleVASConfig(slot=1, merchant_id="pass.com.example.x", key_slot=7)
 
     def test_omitted_key_slot_emits_no_line(self) -> None:
         """An absent key slot must not appear in the output."""
         from vtap100.models.vas import AppleVASConfig
 
-        lines = AppleVASConfig(merchant_id="pass.com.example.x").to_config_lines(1)
+        lines = AppleVASConfig(slot=1, merchant_id="pass.com.example.x").to_config_lines(1)
         assert lines == ["VAS1MerchantID=pass.com.example.x"]

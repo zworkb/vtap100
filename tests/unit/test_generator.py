@@ -24,7 +24,7 @@ class TestVTAPConfig:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         config = VTAPConfig(vas_configs=[vas])
 
         assert len(config.vas_configs) == 1
@@ -35,7 +35,7 @@ class TestVTAPConfig:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        st = GoogleSmartTapConfig(collector_id="96972794", key_slot=2)
+        st = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=2)
         config = VTAPConfig(smarttap_configs=[st])
 
         assert len(config.smarttap_configs) == 1
@@ -59,8 +59,8 @@ class TestVTAPConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
-        st = GoogleSmartTapConfig(collector_id="96972794", key_slot=2)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
+        st = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=2)
         kb = KeyboardConfig(log_mode=True, source="AG")
 
         config = VTAPConfig(
@@ -106,7 +106,7 @@ class TestConfigGenerator:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         config = VTAPConfig(vas_configs=[vas])
         generator = ConfigGenerator(config)
         output = generator.generate()
@@ -120,7 +120,7 @@ class TestConfigGenerator:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        st = GoogleSmartTapConfig(collector_id="96972794", key_slot=2, key_version=1)
+        st = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=2, key_version=1)
         config = VTAPConfig(smarttap_configs=[st])
         generator = ConfigGenerator(config)
         output = generator.generate()
@@ -152,8 +152,8 @@ class TestConfigGenerator:
         from vtap100.models.smarttap import GoogleSmartTapConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
-        st = GoogleSmartTapConfig(collector_id="96972794", key_slot=2, key_version=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
+        st = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=2, key_version=1)
         kb = KeyboardConfig(log_mode=True, source="AG")
 
         config = VTAPConfig(
@@ -177,8 +177,8 @@ class TestConfigGenerator:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas1 = AppleVASConfig(merchant_id="pass.com.example.one", key_slot=1)
-        vas2 = AppleVASConfig(merchant_id="pass.com.example.two", key_slot=2)
+        vas1 = AppleVASConfig(slot=1, merchant_id="pass.com.example.one", key_slot=1)
+        vas2 = AppleVASConfig(slot=2, merchant_id="pass.com.example.two", key_slot=2)
         config = VTAPConfig(vas_configs=[vas1, vas2])
         generator = ConfigGenerator(config)
         output = generator.generate()
@@ -198,7 +198,7 @@ class TestConfigGeneratorFile:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         config = VTAPConfig(vas_configs=[vas])
         generator = ConfigGenerator(config)
 
@@ -216,7 +216,7 @@ class TestConfigGeneratorFile:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         config = VTAPConfig(vas_configs=[vas])
         generator = ConfigGenerator(config)
 
@@ -237,7 +237,7 @@ class TestTemplateGeneration:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.vas import AppleVASConfig
 
-        vas = AppleVASConfig(merchant_id="pass.com.test", key_slot=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)
         config = VTAPConfig(vas_configs=[vas])
         generator = ConfigGenerator(config)
 
@@ -252,7 +252,7 @@ class TestTemplateGeneration:
         from vtap100.models.config import VTAPConfig
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        st = GoogleSmartTapConfig(collector_id="12345678", key_slot=1)
+        st = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)
         config = VTAPConfig(smarttap_configs=[st])
         generator = ConfigGenerator(config)
 

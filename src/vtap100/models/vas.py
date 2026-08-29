@@ -6,6 +6,7 @@ by NFC readers for loyalty, membership, and identity applications.
 
 Example:
     >>> config = AppleVASConfig(
+    ...     slot=1,
     ...     merchant_id="pass.com.example.myapp",
     ...     key_slot=1,
     ... )
@@ -27,6 +28,7 @@ class AppleVASConfig(BaseModel):
     """Configuration for a single Apple VAS pass type.
 
     Attributes:
+        slot: The pass slot number (1-6) appearing in the VAS# parameter names.
         merchant_id: The Apple Pass Type ID (e.g., 'pass.com.company.passname').
             Must start with 'pass.' prefix.
         key_slot: The private key slot (0-6) where the decryption key is stored.
@@ -35,6 +37,12 @@ class AppleVASConfig(BaseModel):
             Note: Currently unsupported by iOS for VAS-only transactions.
     """
 
+    slot: int = Field(
+        ...,
+        ge=1,
+        le=6,
+        description="Pass slot number (1-6) used in the VAS# parameter names",
+    )
     merchant_id: str = Field(
         ...,
         description="Apple Pass Type ID (must start with 'pass.')",

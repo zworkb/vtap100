@@ -137,7 +137,7 @@ class TestHelpPanelAsync:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -174,7 +174,7 @@ class TestHelpPanelAsync:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -212,7 +212,7 @@ class TestHelpPanelAsync:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:

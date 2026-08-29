@@ -122,19 +122,21 @@ class ConfigGenerator:
         # Apple VAS configurations
         if self.config.vas_configs:
             lines.append("; Apple VAS Configuration")
-            for i, vas in enumerate(self.config.vas_configs, start=1):
-                lines.extend(vas.to_config_lines(slot_number=i))
+            for vas in self.config.vas_configs:
+                lines.extend(vas.to_config_lines(slot_number=vas.slot))
 
         # VAS default passes enabled
         if self.config.vas_default_passes:
             lines.append(self.config.vas_default_passes.to_config_line())
 
         # Google Smart Tap configurations
-        # Note: ST1 does not work, so we start at ST2
+        # Slot numbers come from the model. New configurations default to slot 2
+        # because ST1 does not work on real readers, but a slot read from a file
+        # is written back unchanged rather than silently moved.
         if self.config.smarttap_configs:
             lines.append("; Google Smart Tap Configuration")
-            for i, st in enumerate(self.config.smarttap_configs, start=2):
-                lines.extend(st.to_config_lines(slot_number=i))
+            for st in self.config.smarttap_configs:
+                lines.extend(st.to_config_lines(slot_number=st.slot))
 
         # Smart Tap default passes enabled
         if self.config.smarttap_default_passes:

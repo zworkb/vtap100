@@ -117,7 +117,7 @@ class TestGeneratorDefaultPasses:
         from vtap100.models.vas import AppleVASConfig
         from vtap100.models.vas import VASDefaultPassesEnabled
 
-        vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         default_passes = VASDefaultPassesEnabled(enabled_passes=[1, 3, 5])
         config = VTAPConfig(vas_configs=[vas], vas_default_passes=default_passes)
         generator = ConfigGenerator(config)
@@ -132,7 +132,7 @@ class TestGeneratorDefaultPasses:
         from vtap100.models.smarttap import GoogleSmartTapConfig
         from vtap100.models.smarttap import STDefaultPassesEnabled
 
-        st = GoogleSmartTapConfig(collector_id="12345678", key_slot=2, key_version=1)
+        st = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=2, key_version=1)
         default_passes = STDefaultPassesEnabled(enabled_passes=[2, 4, 6])
         config = VTAPConfig(smarttap_configs=[st], smarttap_default_passes=default_passes)
         generator = ConfigGenerator(config)
@@ -388,7 +388,7 @@ class TestAppExportHandling:
             output_path = Path(tmpdir) / "output.txt"
             app = VTAPEditorApp(output_path=output_path)
             app.config = VTAPConfig(
-                vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+                vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
             )
 
             async with app.run_test() as pilot:
@@ -686,7 +686,7 @@ class TestFormErrorHandling:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -719,7 +719,7 @@ class TestAppExportBranches:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -752,7 +752,7 @@ class TestAppExportBranches:
 
             app = VTAPEditorApp(output_path=readonly_path)
             app.config = VTAPConfig(
-                vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+                vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
             )
 
             async with app.run_test() as pilot:
@@ -1008,7 +1008,7 @@ class TestFormClearMessages:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1049,7 +1049,7 @@ class TestFormClearMessages:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=1)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)]
         )
 
         async with app.run_test() as pilot:

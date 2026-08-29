@@ -149,8 +149,8 @@ KBSource=AG
             await pilot.pause()
 
             # Add configurations
-            vas = AppleVASConfig(merchant_id="pass.com.roundtrip", key_slot=3)
-            st = GoogleSmartTapConfig(collector_id="12345678", key_slot=4, key_version=2)
+            vas = AppleVASConfig(slot=1, merchant_id="pass.com.roundtrip", key_slot=3)
+            st = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=4, key_version=2)
             app1.config.vas_configs.append(vas)
             app1.config.smarttap_configs.append(st)
 

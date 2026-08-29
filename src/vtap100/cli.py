@@ -160,7 +160,7 @@ def generate(
 
     if apple_vas:
         try:
-            vas = AppleVASConfig(merchant_id=apple_vas, key_slot=key_slot)
+            vas = AppleVASConfig(slot=1, merchant_id=apple_vas, key_slot=key_slot)
             vas_configs.append(vas)
             console.print("\n[bold]Apple VAS Configuration[/bold]")
             console.print(f"  Merchant ID: [cyan]{apple_vas}[/cyan]")
@@ -172,6 +172,7 @@ def generate(
     if google_st:
         try:
             st = GoogleSmartTapConfig(
+                slot=2,
                 collector_id=google_st,
                 key_slot=key_slot,
                 key_version=key_version,
@@ -253,7 +254,7 @@ def wizard() -> None:
         key_slot = click.prompt("Key-Slot (1-6)", type=int, default=1)
 
         try:
-            vas = AppleVASConfig(merchant_id=merchant_id, key_slot=key_slot)
+            vas = AppleVASConfig(slot=1, merchant_id=merchant_id, key_slot=key_slot)
             vas_configs.append(vas)
             print_success("Apple VAS konfiguriert")
         except ValueError as e:
@@ -270,6 +271,7 @@ def wizard() -> None:
 
         try:
             st = GoogleSmartTapConfig(
+                slot=2,
                 collector_id=collector_id,
                 key_slot=key_slot,
                 key_version=key_version,

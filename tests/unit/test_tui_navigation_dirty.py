@@ -136,7 +136,7 @@ class TestNavigationWithDirtyForm:
         # Create app with an existing VAS config
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -175,7 +175,7 @@ class TestNavigationWithDirtyForm:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -223,7 +223,7 @@ class TestNavigationWithDirtyForm:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -270,7 +270,7 @@ class TestNavigationWithDirtyForm:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -320,7 +320,7 @@ class TestNavigationWithDirtyForm:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:

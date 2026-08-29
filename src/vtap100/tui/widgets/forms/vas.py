@@ -76,7 +76,7 @@ class VASConfigForm(SlotBasedConfigForm):
         super().__init__(id=id)
         self.index = index
         self.is_new = is_new
-        self._config = config or AppleVASConfig(merchant_id="pass.", key_slot=1)
+        self._config = config or AppleVASConfig(slot=1, merchant_id="pass.", key_slot=1)
 
     def _get_used_key_slots(self) -> dict[int, str]:
         """Get key slots that are already in use by other configs.
@@ -147,6 +147,7 @@ class VASConfigForm(SlotBasedConfigForm):
         merchant_url = self.query_one("#merchant_url", Input).value or None
 
         return AppleVASConfig(
+            slot=1,
             merchant_id=merchant_id,
             key_slot=key_slot,
             merchant_url=merchant_url,

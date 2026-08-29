@@ -113,7 +113,9 @@ class TestExportDialogFormats:
             await pilot.pause()
 
             # Add VAS config
-            app.config.vas_configs.append(AppleVASConfig(merchant_id="pass.com.test", key_slot=1))
+            app.config.vas_configs.append(
+                AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)
+            )
 
             # Open dialog and export (full is default)
             await pilot.press("ctrl+e")
@@ -145,7 +147,9 @@ class TestExportDialogFormats:
             await pilot.pause()
 
             # Add configs
-            app.config.vas_configs.append(AppleVASConfig(merchant_id="pass.com.test", key_slot=1))
+            app.config.vas_configs.append(
+                AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)
+            )
             app.config.keyboard = KeyboardConfig(log_mode=True)
 
             # Open dialog
@@ -275,7 +279,9 @@ class TestExportDialogCombinations:
             await pilot.pause()
 
             # Add VAS config (should be excluded in template)
-            app.config.vas_configs.append(AppleVASConfig(merchant_id="pass.com.test", key_slot=1))
+            app.config.vas_configs.append(
+                AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)
+            )
 
             await pilot.press("ctrl+e")
             await pilot.pause()

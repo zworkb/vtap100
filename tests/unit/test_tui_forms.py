@@ -77,7 +77,7 @@ class TestVASConfigForm:
         """VASConfigForm can be created with existing config."""
         from vtap100.tui.widgets.forms.vas import VASConfigForm
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         form = VASConfigForm(config=config, index=0)
         assert form._config == config
         assert form.index == 0
@@ -95,7 +95,7 @@ class TestVASConfigFormAsync:
         # Create app with VAS config
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -124,7 +124,7 @@ class TestVASConfigFormAsync:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -150,7 +150,7 @@ class TestVASConfigFormAsync:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.myapp", key_slot=2)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.myapp", key_slot=2)]
         )
 
         async with app.run_test() as pilot:
@@ -181,7 +181,7 @@ class TestFormFocus:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -207,7 +207,7 @@ class TestFormFocus:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=1)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -261,7 +261,7 @@ class TestSmartTapConfigForm:
         """SmartTapConfigForm can be created with existing config."""
         from vtap100.tui.widgets.forms.smarttap import SmartTapConfigForm
 
-        config = GoogleSmartTapConfig(collector_id="12345678", key_slot=1, key_version=1)
+        config = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1, key_version=1)
         form = SmartTapConfigForm(config=config, index=0)
         assert form._config == config
 
@@ -278,7 +278,7 @@ class TestSmartTapConfigFormAsync:
         app = VTAPEditorApp()
         app.config = VTAPConfig(
             smarttap_configs=[
-                GoogleSmartTapConfig(collector_id="96972794", key_slot=1, key_version=1)
+                GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=1, key_version=1)
             ]
         )
 
@@ -363,7 +363,7 @@ class TestAddNewConfig:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -534,7 +534,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -561,7 +561,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.original", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.original", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -596,7 +596,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
         assert len(app.config.vas_configs) == 1
 
@@ -627,7 +627,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -662,7 +662,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -700,7 +700,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=1)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -738,7 +738,7 @@ class TestExistingConfigButtons:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.original", key_slot=2)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.original", key_slot=2)]
         )
         assert len(app.config.vas_configs) == 1
 
@@ -959,7 +959,7 @@ class TestPostAddBehavior:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.original", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.original", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -997,7 +997,7 @@ class TestPostAddBehavior:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.original", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.original", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1118,7 +1118,7 @@ class TestPostAddBehavior:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.original", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.original", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1164,7 +1164,7 @@ class TestPostAddBehavior:
         try:
             app = VTAPEditorApp()
             app.config = VTAPConfig(
-                vas_configs=[AppleVASConfig(merchant_id="pass.com.original", key_slot=1)]
+                vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.original", key_slot=1)]
             )
 
             async with app.run_test() as pilot:
@@ -1216,7 +1216,7 @@ class TestKeySlotSelect:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1242,7 +1242,7 @@ class TestKeySlotSelect:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=2)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=2)]
         )
 
         async with app.run_test() as pilot:
@@ -1268,7 +1268,7 @@ class TestKeySlotSelect:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1298,7 +1298,7 @@ class TestKeySlotSelect:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=3)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=3)]
         )
 
         async with app.run_test() as pilot:
@@ -1326,8 +1326,8 @@ class TestKeySlotSelect:
         app = VTAPEditorApp()
         # VAS config uses slot 1, SmartTap uses slot 3
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)],
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=3)],
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)],
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=3)],
         )
 
         async with app.run_test() as pilot:
@@ -1361,7 +1361,7 @@ class TestKeySlotSelect:
         app = VTAPEditorApp()
         # Only slot 1 is used
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1393,7 +1393,7 @@ class TestSidebarTreeLabels:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.myapp", key_slot=2)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.myapp", key_slot=2)]
         )
 
         async with app.run_test() as pilot:
@@ -1418,7 +1418,7 @@ class TestSidebarTreeLabels:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="96972794", key_slot=1)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -1443,7 +1443,7 @@ class TestSidebarTreeLabels:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=3)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=3)]
         )
 
         async with app.run_test() as pilot:
@@ -1466,7 +1466,7 @@ class TestSidebarTreeLabels:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=2)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=2)]
         )
 
         async with app.run_test() as pilot:

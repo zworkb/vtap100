@@ -6,6 +6,7 @@ by NFC readers for loyalty, membership, and identity applications.
 
 Example:
     >>> config = GoogleSmartTapConfig(
+    ...     slot=2,
     ...     collector_id="96972794",
     ...     key_slot=1,
     ...     key_version=1,
@@ -31,6 +32,7 @@ class GoogleSmartTapConfig(BaseModel):
     """Configuration for a single Google Smart Tap pass type.
 
     Attributes:
+        slot: The pass slot number (1-6) appearing in the ST# parameter names.
         collector_id: The Google Collector ID (numeric string).
             Provided by Google to uniquely identify your passes.
         key_slot: The private key slot (1-6) where the decryption key is stored.
@@ -39,6 +41,12 @@ class GoogleSmartTapConfig(BaseModel):
             Defaults to 0 if not specified.
     """
 
+    slot: int = Field(
+        ...,
+        ge=1,
+        le=6,
+        description="Pass slot number (1-6) used in the ST# parameter names",
+    )
     collector_id: str = Field(
         ...,
         description="Google Collector ID (numeric string)",

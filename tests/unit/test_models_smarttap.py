@@ -16,13 +16,13 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         with pytest.raises(ValidationError):
-            GoogleSmartTapConfig(key_slot=1)  # type: ignore[call-arg]
+            GoogleSmartTapConfig(slot=2, key_slot=1)  # type: ignore[call-arg]
 
     def test_smarttap_config_valid_minimal(self) -> None:
         """Valid Smart Tap config with collector_id and key_slot should be created."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        config = GoogleSmartTapConfig(collector_id="96972794", key_slot=1)
+        config = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=1)
         assert config.collector_id == "96972794"
         assert config.key_slot == 1
         assert config.key_version is None
@@ -35,7 +35,7 @@ class TestGoogleSmartTapConfig:
         """
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        config = GoogleSmartTapConfig(collector_id="96972794")
+        config = GoogleSmartTapConfig(slot=2, collector_id="96972794")
         assert config.key_slot is None
         assert config.key_version is None
 
@@ -44,6 +44,7 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=0,
         )
@@ -54,6 +55,7 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=2,
         )
@@ -65,6 +67,7 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=2,
             key_version=1,
@@ -78,7 +81,7 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         # Valid numeric strings
-        config = GoogleSmartTapConfig(collector_id="12345678", key_slot=1)
+        config = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)
         assert config.collector_id == "12345678"
 
     def test_smarttap_config_collector_id_empty_invalid(self) -> None:
@@ -86,7 +89,7 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         with pytest.raises(ValidationError):
-            GoogleSmartTapConfig(collector_id="")
+            GoogleSmartTapConfig(slot=2, collector_id="")
 
     def test_smarttap_config_key_slot_valid_range(self) -> None:
         """Key slot must be between 1 and 6 (0 is no longer valid)."""
@@ -95,6 +98,7 @@ class TestGoogleSmartTapConfig:
         # Valid slots are now 1-6 only
         for slot in range(1, 7):  # 1-6
             config = GoogleSmartTapConfig(
+                slot=2,
                 collector_id="96972794",
                 key_slot=slot,
             )
@@ -106,6 +110,7 @@ class TestGoogleSmartTapConfig:
 
         with pytest.raises(ValidationError):
             GoogleSmartTapConfig(
+                slot=2,
                 collector_id="96972794",
                 key_slot=-1,
             )
@@ -116,6 +121,7 @@ class TestGoogleSmartTapConfig:
 
         with pytest.raises(ValidationError):
             GoogleSmartTapConfig(
+                slot=2,
                 collector_id="96972794",
                 key_slot=7,
             )
@@ -128,7 +134,7 @@ class TestGoogleSmartTapConfig:
         """
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        config = GoogleSmartTapConfig(collector_id="96972794", key_slot=1)
+        config = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=1)
         assert config.key_version is None
 
     def test_smarttap_config_key_version_positive(self) -> None:
@@ -136,6 +142,7 @@ class TestGoogleSmartTapConfig:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=1,
             key_version=10,
@@ -148,6 +155,7 @@ class TestGoogleSmartTapConfig:
 
         with pytest.raises(ValidationError):
             GoogleSmartTapConfig(
+                slot=2,
                 collector_id="96972794",
                 key_version=-1,
             )
@@ -160,14 +168,16 @@ class TestGoogleSmartTapConfigOutput:
         """Set fields produce lines; absent ones must not be invented."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        config = GoogleSmartTapConfig(collector_id="96972794", key_slot=1, key_version=0)
+        config = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=1, key_version=0)
         lines = config.to_config_lines(slot_number=1)
 
         assert "ST1CollectorID=96972794" in lines
         assert "ST1KeySlot=1" in lines
         assert "ST1KeyVersion=0" in lines
 
-        sparse = GoogleSmartTapConfig(collector_id="96972794").to_config_lines(slot_number=1)
+        sparse = GoogleSmartTapConfig(slot=2, collector_id="96972794").to_config_lines(
+            slot_number=1
+        )
         assert sparse == ["ST1CollectorID=96972794"]
 
     def test_to_config_lines_with_key_slot(self) -> None:
@@ -175,6 +185,7 @@ class TestGoogleSmartTapConfigOutput:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=2,
         )
@@ -188,6 +199,7 @@ class TestGoogleSmartTapConfigOutput:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=2,
             key_version=1,
@@ -203,6 +215,7 @@ class TestGoogleSmartTapConfigOutput:
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         config = GoogleSmartTapConfig(
+            slot=2,
             collector_id="96972794",
             key_slot=3,
             key_version=1,
@@ -219,7 +232,7 @@ class TestGoogleSmartTapConfigOutput:
         """to_config_lines should return a list of strings."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        config = GoogleSmartTapConfig(collector_id="96972794", key_slot=1)
+        config = GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=1)
         lines = config.to_config_lines(slot_number=1)
 
         assert isinstance(lines, list)
@@ -283,24 +296,24 @@ class TestSmartTapKeySlotOptional:
         """A Smart Tap config without a key slot is valid."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        assert GoogleSmartTapConfig(collector_id="12345678").key_slot is None
+        assert GoogleSmartTapConfig(slot=2, collector_id="12345678").key_slot is None
 
     def test_key_slot_zero_is_valid(self) -> None:
         """Zero is the documented default."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        assert GoogleSmartTapConfig(collector_id="12345678", key_slot=0).key_slot == 0
+        assert GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=0).key_slot == 0
 
     def test_key_slot_seven_is_rejected(self) -> None:
         """Above the documented range is an error."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
         with pytest.raises(ValidationError):
-            GoogleSmartTapConfig(collector_id="12345678", key_slot=7)
+            GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=7)
 
     def test_omitted_fields_emit_no_lines(self) -> None:
         """Absent key slot and key version must not appear in the output."""
         from vtap100.models.smarttap import GoogleSmartTapConfig
 
-        lines = GoogleSmartTapConfig(collector_id="12345678").to_config_lines(2)
+        lines = GoogleSmartTapConfig(slot=2, collector_id="12345678").to_config_lines(2)
         assert lines == ["ST2CollectorID=12345678"]

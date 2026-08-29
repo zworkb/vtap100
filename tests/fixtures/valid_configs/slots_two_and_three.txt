@@ -1,0 +1,10 @@
+!VTAPconfig
+
+; Pass slots need not start at 1 or be contiguous. The slot number is a
+; grouping index; the key slot it points at is independent.
+VAS2MerchantID=pass.com.example.library-card
+VAS2KeySlot=2
+
+ST3CollectorID=12345678
+ST3KeySlot=3
+ST3KeyVersion=1

@@ -266,7 +266,7 @@ class TestConfigParserRoundTrip:
         from vtap100.parser import parse
 
         original = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)]
         )
         generator = ConfigGenerator(original)
         content = generator.generate()
@@ -286,9 +286,9 @@ class TestConfigParserRoundTrip:
         from vtap100.parser import parse
 
         original = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)],
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)],
             smarttap_configs=[
-                GoogleSmartTapConfig(collector_id="96972794", key_slot=2, key_version=1)
+                GoogleSmartTapConfig(slot=2, collector_id="96972794", key_slot=2, key_version=1)
             ],
             keyboard=KeyboardConfig(log_mode=True, source="AG"),
         )
@@ -855,3 +855,46 @@ class TestConfigParserFeedbackRoundTrip:
         assert parsed.feedback.led.mode == LEDMode.CUSTOM
         assert parsed.feedback.led.pass_led is not None
         assert parsed.feedback.led.pass_led.color == "00FF00"
+
+
+class TestSlotPreservation:
+    """Pass slot numbers must survive parse and regenerate."""
+
+    def test_vas_slot_is_captured(self) -> None:
+        """VAS2 stays slot 2 in the model."""
+        from vtap100.parser import parse
+
+        config = parse("!VTAPconfig\nVAS2MerchantID=pass.com.example.x\nVAS2KeySlot=2\n")
+        assert config.vas_configs[0].slot == 2
+
+    def test_smarttap_slot_is_captured(self) -> None:
+        """ST3 stays slot 3 in the model."""
+        from vtap100.parser import parse
+
+        config = parse("!VTAPconfig\nST3CollectorID=12345678\nST3KeySlot=3\n")
+        assert config.smarttap_configs[0].slot == 3
+
+    def test_slots_are_not_renumbered(self) -> None:
+        """Regenerating writes back the original slot numbers."""
+        from vtap100.generator import ConfigGenerator
+        from vtap100.parser import parse
+
+        text = "!VTAPconfig\nVAS2MerchantID=pass.com.example.x\nST3CollectorID=12345678\n"
+        out = ConfigGenerator(parse(text)).generate()
+        assert "VAS2MerchantID" in out
+        assert "ST3CollectorID" in out
+        assert "VAS1MerchantID" not in out
+        assert "ST2CollectorID" not in out
+
+    def test_smarttap_slot_one_is_preserved(self) -> None:
+        """ST1 is written back as ST1, not silently moved to ST2.
+
+        ST1 does not work on real readers (see d18c8c4) and config creation
+        still avoids it, but rewriting a file the user asked us to load is a
+        silent change to their configuration.
+        """
+        from vtap100.generator import ConfigGenerator
+        from vtap100.parser import parse
+
+        out = ConfigGenerator(parse("!VTAPconfig\nST1CollectorID=80644855\n")).generate()
+        assert "ST1CollectorID=80644855" in out

@@ -293,8 +293,8 @@ class TestSmartTapSlotInfo:
         app = VTAPEditorApp()
         # VAS uses slot 1, SmartTap uses slot 3
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)],
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=3)],
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)],
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=3)],
         )
 
         async with app.run_test() as pilot:
@@ -371,7 +371,7 @@ class TestSmartTapValidation:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="12345678", key_slot=1)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -407,7 +407,7 @@ class TestSmartTapDuplicate:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="87654321", key_slot=2)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="87654321", key_slot=2)]
         )
 
         async with app.run_test() as pilot:
@@ -443,7 +443,7 @@ class TestSmartTapRemove:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            smarttap_configs=[GoogleSmartTapConfig(collector_id="11111111", key_slot=1)]
+            smarttap_configs=[GoogleSmartTapConfig(slot=2, collector_id="11111111", key_slot=1)]
         )
         assert len(app.config.smarttap_configs) == 1
 

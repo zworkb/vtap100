@@ -18,7 +18,7 @@ class TestFormDirtyStateBasic:
         """A newly created form should not be dirty."""
         from vtap100.tui.widgets.forms.vas import VASConfigForm
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         form = VASConfigForm(config=config, index=0, is_new=False)
         assert hasattr(form, "is_dirty")
         assert form.is_dirty is False
@@ -27,7 +27,7 @@ class TestFormDirtyStateBasic:
         """Form should have a mark_saved method."""
         from vtap100.tui.widgets.forms.vas import VASConfigForm
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         form = VASConfigForm(config=config, index=0, is_new=False)
         assert hasattr(form, "mark_saved")
         assert callable(form.mark_saved)
@@ -36,7 +36,7 @@ class TestFormDirtyStateBasic:
         """Form should have a method to get current form values."""
         from vtap100.tui.widgets.forms.vas import VASConfigForm
 
-        config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+        config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
         form = VASConfigForm(config=config, index=0, is_new=False)
         assert hasattr(form, "get_form_values")
         assert callable(form.get_form_values)
@@ -56,7 +56,7 @@ class TestFormDirtyStateAsync:
             config = VTAPConfig()
 
             def compose(self):
-                vas_config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+                vas_config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
                 yield VASConfigForm(config=vas_config, index=0, is_new=False)
 
         async with TestApp().run_test() as pilot:
@@ -112,7 +112,7 @@ class TestFormDirtyStateAsync:
             config = VTAPConfig()
 
             def compose(self):
-                vas_config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+                vas_config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
                 yield VASConfigForm(config=vas_config, index=0, is_new=False)
 
         async with TestApp().run_test() as pilot:
@@ -142,7 +142,7 @@ class TestFormDirtyStateAsync:
             config = VTAPConfig()
 
             def compose(self):
-                vas_config = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+                vas_config = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
                 yield VASConfigForm(config=vas_config, index=0, is_new=False)
 
         async with TestApp().run_test() as pilot:
@@ -179,7 +179,7 @@ class TestFormDirtyStateSmartTap:
             config = VTAPConfig()
 
             def compose(self):
-                st_config = GoogleSmartTapConfig(collector_id="12345678", key_slot=1)
+                st_config = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=1)
                 yield SmartTapConfigForm(config=st_config, index=0, is_new=False)
 
         async with TestApp().run_test() as pilot:

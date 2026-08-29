@@ -167,7 +167,7 @@ class TestSaveAction:
             output_path = Path(tmpdir) / "output.txt"
             app = VTAPEditorApp(output_path=output_path)
             app.config = VTAPConfig(
-                vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+                vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
             )
 
             async with app.run_test() as pilot:
@@ -268,7 +268,7 @@ class TestLanguageToggleWithFormValues:
 
         app = VTAPEditorApp()
         app.config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
         )
 
         async with app.run_test() as pilot:
@@ -309,7 +309,7 @@ class TestSaveActionErrorHandling:
             output_path = Path(tmpdir) / "output.txt"
             app = VTAPEditorApp(output_path=output_path)
             app.config = VTAPConfig(
-                vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+                vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
             )
 
             async with app.run_test() as pilot:
@@ -499,7 +499,7 @@ class TestExportFormatAndTarget:
             output_path = Path(tmpdir) / "output.txt"
             app = VTAPEditorApp(output_path=output_path)
             app.config = VTAPConfig(
-                vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)]
+                vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
             )
 
             async with app.run_test() as pilot:

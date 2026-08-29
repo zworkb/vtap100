@@ -548,6 +548,7 @@ class ConfigParser:
             if data.merchant_id:
                 vas_configs.append(
                     AppleVASConfig(
+                        slot=slot,
                         merchant_id=data.merchant_id,
                         key_slot=data.key_slot,
                         merchant_url=data.merchant_url,
@@ -560,6 +561,7 @@ class ConfigParser:
             if data.collector_id:
                 smarttap_configs.append(
                     GoogleSmartTapConfig(
+                        slot=slot,
                         collector_id=data.collector_id,
                         key_slot=data.key_slot,
                         key_version=data.key_version,

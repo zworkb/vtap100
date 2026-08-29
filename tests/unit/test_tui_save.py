@@ -25,7 +25,7 @@ class TestSaveFunction:
             await pilot.pause()
 
             # Add a VAS config
-            vas = AppleVASConfig(merchant_id="pass.com.example.save", key_slot=1)
+            vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.save", key_slot=1)
             app.config.vas_configs.append(vas)
 
             # Press Ctrl+S to save
@@ -87,7 +87,7 @@ class TestSaveFunction:
                 await pilot.pause()
 
                 # Add a VAS config
-                vas = AppleVASConfig(merchant_id="pass.com.dialog.test", key_slot=1)
+                vas = AppleVASConfig(slot=1, merchant_id="pass.com.dialog.test", key_slot=1)
                 app.config.vas_configs.append(vas)
 
                 # Press Ctrl+S to save (no output path set)
@@ -151,7 +151,7 @@ class TestSaveFunction:
             await pilot.pause()
 
             # Add a VAS config
-            vas = AppleVASConfig(merchant_id="pass.com.new", key_slot=2)
+            vas = AppleVASConfig(slot=1, merchant_id="pass.com.new", key_slot=2)
             app.config.vas_configs.append(vas)
 
             # Press Ctrl+S to save
@@ -176,8 +176,8 @@ class TestSaveFunction:
             await pilot.pause()
 
             # Add VAS and SmartTap configs
-            vas = AppleVASConfig(merchant_id="pass.com.test", key_slot=1)
-            st = GoogleSmartTapConfig(collector_id="12345678", key_slot=2)
+            vas = AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)
+            st = GoogleSmartTapConfig(slot=2, collector_id="12345678", key_slot=2)
             app.config.vas_configs.append(vas)
             app.config.smarttap_configs.append(st)
 

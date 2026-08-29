@@ -77,7 +77,7 @@ class SmartTapConfigForm(SlotBasedConfigForm):
         self.index = index
         self.is_new = is_new
         # Use placeholder collector_id and key_slot=1 for new configs
-        self._config = config or GoogleSmartTapConfig(collector_id="00000000", key_slot=1)
+        self._config = config or GoogleSmartTapConfig(slot=2, collector_id="00000000", key_slot=1)
 
     def _get_used_key_slots(self) -> dict[int, str]:
         """Get key slots that are already in use by other configs.
@@ -149,6 +149,7 @@ class SmartTapConfigForm(SlotBasedConfigForm):
         key_version = int(key_version_str) if key_version_str else 0
 
         return GoogleSmartTapConfig(
+            slot=2,
             collector_id=collector_id,
             key_slot=key_slot,
             key_version=key_version,

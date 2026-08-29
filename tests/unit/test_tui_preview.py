@@ -70,7 +70,7 @@ class TestConfigPreviewAsync:
             await pilot.pause()
 
             # Add a VAS config
-            vas = AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1)
+            vas = AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1)
             app.config.vas_configs.append(vas)
 
             # Get preview and refresh
@@ -101,7 +101,7 @@ class TestConfigPreviewAsync:
             assert "VAS1MerchantID" not in content1
 
             # Add VAS config and update
-            vas = AppleVASConfig(merchant_id="pass.com.test", key_slot=2)
+            vas = AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=2)
             app.config.vas_configs.append(vas)
             preview.update_preview(app.config)
 
@@ -275,7 +275,9 @@ class TestConfigPreviewEdgeCases:
         preview = ConfigPreview()
 
         # Call update_preview without mounting - should not raise
-        config = VTAPConfig(vas_configs=[AppleVASConfig(merchant_id="pass.com.test", key_slot=1)])
+        config = VTAPConfig(
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.test", key_slot=1)]
+        )
         preview.update_preview(config)
 
         # Content should be updated
@@ -289,7 +291,7 @@ class TestConfigPreviewEdgeCases:
         from vtap100.tui.widgets.preview import ConfigPreview
 
         config = VTAPConfig(
-            vas_configs=[AppleVASConfig(merchant_id="pass.com.initial", key_slot=2)]
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.initial", key_slot=2)]
         )
         preview = ConfigPreview(config=config)
 
@@ -302,7 +304,9 @@ class TestConfigPreviewEdgeCases:
         from vtap100.models.vas import AppleVASConfig
         from vtap100.tui.widgets.preview import ConfigPreview
 
-        config = VTAPConfig(vas_configs=[AppleVASConfig(merchant_id="pass.com.gen", key_slot=3)])
+        config = VTAPConfig(
+            vas_configs=[AppleVASConfig(slot=1, merchant_id="pass.com.gen", key_slot=3)]
+        )
         preview = ConfigPreview(config=config)
 
         # Call _generate_content directly

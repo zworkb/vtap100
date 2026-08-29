@@ -99,7 +99,7 @@ class TestConfigSidebarAsync:
         app = VTAPEditorApp()
         app.config = VTAPConfig(
             vas_configs=[
-                AppleVASConfig(merchant_id="pass.com.example.test", key_slot=1),
+                AppleVASConfig(slot=1, merchant_id="pass.com.example.test", key_slot=1),
             ]
         )
 
