@@ -153,6 +153,289 @@ Out of scope, documented as known limitations in `docs/troubleshooting.md`:
 
 ## 5. Design
 
+The class model below shows every type this work touches. `<<new>>` marks a class
+this spec adds; `<<changed>>` marks one whose fields or types change. Everything
+unmarked stays as it is and appears only to show where the changes sit.
+
+### Configuration aggregate
+
+```mermaid
+classDiagram
+    direction LR
+
+    class VTAPConfig {
+        +list~AppleVASConfig~ vas_configs
+        +list~GoogleSmartTapConfig~ smarttap_configs
+        +VASDefaultPassesEnabled vas_default_passes
+        +STDefaultPassesEnabled smarttap_default_passes
+        +KeyboardConfig keyboard
+        +NFCTagConfig nfc
+        +DESFireConfig desfire
+        +FeedbackConfig feedback
+        +AccessConfig access
+        +ComPortConfig com_port
+    }
+
+    class AppleVASConfig {
+        <<changed>>
+        +int slot
+        +str merchant_id
+        +int? key_slot
+        +str? merchant_url
+        +to_config_lines(slot) list~str~
+    }
+
+    class GoogleSmartTapConfig {
+        <<changed>>
+        +int slot
+        +str collector_id
+        +int? key_slot
+        +int? key_version
+        +to_config_lines(slot) list~str~
+    }
+
+    class KeyboardConfig {
+        <<changed>>
+        +bool log_mode
+        +bool? enable
+        +str source
+        +str? prefix
+        +str? postfix
+        +int? delay_ms
+        +bool? pass_mode
+        +int? pass_section
+        +str? pass_separator
+        +int? pass_start
+        +int? pass_length
+    }
+
+    class AccessConfig {
+        <<new>>
+        +str? tci
+        +bool? auth_required
+        +str? ecp2_mode
+    }
+
+    class ComPortConfig {
+        <<new>>
+        +bool? enable
+        +int? mode
+        +str? source
+    }
+
+    class DefaultPassesEnabled {
+        +list~int~ enabled_passes
+        +str CONFIG_PREFIX
+    }
+
+    VTAPConfig o-- "0..6" AppleVASConfig
+    VTAPConfig o-- "0..6" GoogleSmartTapConfig
+    VTAPConfig o-- "0..1" KeyboardConfig
+    VTAPConfig o-- "0..1" NFCTagConfig
+    VTAPConfig o-- "0..1" DESFireConfig
+    VTAPConfig o-- "0..1" FeedbackConfig
+    VTAPConfig o-- "0..1" AccessConfig
+    VTAPConfig o-- "0..1" ComPortConfig
+    VTAPConfig o-- "0..1" VASDefaultPassesEnabled
+    VTAPConfig o-- "0..1" STDefaultPassesEnabled
+
+    DefaultPassesEnabled <|-- VASDefaultPassesEnabled
+    DefaultPassesEnabled <|-- STDefaultPassesEnabled
+```
+
+`slot` is what makes `VAS2` stay `VAS2`. Without it the number lives only in the
+list index, which is why the generator renumbers today.
+
+### DESFire, NFC and feedback
+
+```mermaid
+classDiagram
+    direction TB
+
+    class DESFireConfig {
+        +list~DESFireAppConfig~ apps
+        +str separator
+    }
+
+    class DESFireAppConfig {
+        <<changed>>
+        +str app_id
+        +int? file_id
+        +int? key_num
+        +int? key_slot
+        +DESFireCryptoMode? crypto
+        +DESFireDataFormat? format
+        +int? read_length
+        +int? read_offset
+        +int? diversification
+        +int? privacy_key_num
+        +int? privacy_key_slot
+        +int? sysid_key_slot
+        +int? sysid_length
+    }
+
+    class DiversificationBuilder {
+        <<new>>
+        +int ACTIVE
+        +int OMIT_AID
+        +int REVERSE_UID
+        +build() int
+    }
+
+    class KBSourceBuilder {
+        +int MOBILE_PASS
+        +int STUID
+        +int CARD_EMULATION
+        +build() str
+    }
+
+    class NFCTagConfig {
+        +NFCTagMode? type2
+        +NFCTagMode? type4
+        +NFCTagMode? type5
+        +bool report_read_error
+        +bool ignore_random_uid
+        +TagReadConfig tag_read
+    }
+
+    class TagReadConfig {
+        +int? block_num
+        +int? key_slot
+        +TagKeyType? key_type
+        +TagReadFormat? format
+    }
+
+    class FeedbackConfig {
+        +LEDConfig led
+        +BeepConfig beep
+    }
+
+    class LEDConfig {
+        +LEDMode? mode
+        +LEDSelect select
+        +str? default_rgb
+        +LEDSequence pass_led
+        +LEDSequence tag_led
+        +LEDSequence pass_error_led
+        +LEDSequence start_led
+    }
+
+    class BeepConfig {
+        +BeepSequence pass_beep
+        +BeepSequence tag_beep
+        +BeepSequence pass_error_beep
+        +BeepSequence start_beep
+    }
+
+    class LEDSequence {
+        <<changed>>
+        +str color
+        +int on_ms
+        +int? off_ms
+        +int? repeats
+    }
+
+    class BeepSequence {
+        <<changed>>
+        +int on_ms
+        +int? off_ms
+        +int? repeats
+        +int? frequency
+    }
+
+    DESFireConfig o-- "1..*" DESFireAppConfig
+    DESFireAppConfig ..> DiversificationBuilder : bit field
+    DESFireAppConfig ..> DESFireCryptoMode
+    DESFireAppConfig ..> DESFireDataFormat
+    KeyboardConfig ..> KBSourceBuilder : bit field
+    ComPortConfig ..> KBSourceBuilder : same bitmask
+    NFCTagConfig o-- "0..1" TagReadConfig
+    NFCTagConfig ..> NFCTagMode
+    TagReadConfig ..> TagKeyType
+    TagReadConfig ..> TagReadFormat
+    FeedbackConfig o-- "0..1" LEDConfig
+    FeedbackConfig o-- "0..1" BeepConfig
+    LEDConfig o-- "0..4" LEDSequence
+    LEDConfig ..> LEDMode
+    LEDConfig ..> LEDSelect
+    BeepConfig o-- "0..4" BeepSequence
+```
+
+`off_ms` and `repeats` becoming optional is what lets `TagBeep=100` survive as
+`TagBeep=100` instead of being discarded. `DiversificationBuilder` deliberately
+mirrors the existing `KBSourceBuilder`: two bitmask settings, one pattern.
+
+### Processing pipeline
+
+```mermaid
+classDiagram
+    direction LR
+
+    class ConfigParser {
+        +str content
+        +parse() VTAPConfig
+    }
+
+    class ConfigGenerator {
+        +VTAPConfig config
+        +generate() str
+        +generate_template() str
+    }
+
+    class RoundTrip {
+        <<new>>
+        +compare(text) RoundTripReport
+    }
+
+    class RoundTripReport {
+        <<new>>
+        +list~str~ lost
+        +list~str~ changed
+        +bool is_lossless
+    }
+
+    class Anonymizer {
+        <<new>>
+        +anonymise(text) str
+        +list~Substitution~ substitutions
+    }
+
+    class TestFixtureConfigs {
+        <<new>>
+        +test_roundtrip_preserves_all_settings()
+    }
+
+    class CLI {
+        +editor()
+        +generate()
+        +validate(--roundtrip)
+        +anonymize()
+    }
+
+    class VTAPEditorApp {
+        +VTAPConfig config
+        +Path input_path
+        +Path output_path
+    }
+
+    ConfigParser ..> VTAPConfig : produces
+    ConfigGenerator ..> VTAPConfig : consumes
+    RoundTrip ..> ConfigParser
+    RoundTrip ..> ConfigGenerator
+    RoundTrip ..> RoundTripReport : produces
+    CLI ..> RoundTrip
+    CLI ..> Anonymizer
+    CLI ..> VTAPEditorApp
+    VTAPEditorApp ..> ConfigParser
+    VTAPEditorApp ..> ConfigGenerator
+    TestFixtureConfigs ..> RoundTrip
+```
+
+`RoundTrip` is imported by both the CLI and the test battery. A second
+implementation on either side would let the tool and CI disagree about what
+"lossless" means, which is the one thing this work cannot afford.
+
+
 ### 5.1 Validation philosophy: tolerant read, strict create
 
 Real files contain values outside the documented ranges — including the
