@@ -78,10 +78,17 @@ and saves it gets a reader that no longer authenticates, with no warning.
 
 ### 2.2 Round-trip data loss
 
-**Slot numbers are not preserved.** `VAS2*` becomes `VAS1*`, `ST3*` becomes
-`ST2*`, and VAS and Smart Tap share a single counter. `AppleVASConfig` and
-`GoogleSmartTapConfig` have no slot field at all, so the number is discarded at
-parse time.
+**Slot numbers are not preserved.** `VAS2*` becomes `VAS1*` and `ST3*` becomes
+`ST2*`. `AppleVASConfig` and `GoogleSmartTapConfig` have no slot field, so the
+number is discarded at parse time and the generator re-derives it from the list
+index: `enumerate(vas_configs, start=1)` and `enumerate(smarttap_configs,
+start=2)`.
+
+The Smart Tap `start=2` is deliberate. Commit `d18c8c4` established that "ST1
+configuration slot does not work for Google Smart Tap on VTAP readers", and all
+17 real configurations use ST2 or ST3, never ST1 — the finding holds. But the
+manufacturer's own sample uses `ST1CollectorID`, so the rule silently rewrites
+the vendor's reference file.
 
 **Short forms are silently dropped.** `_parse_beep_sequence` requires at least
 three comma-separated parts and returns `None` otherwise. `TagBeep=100` and
@@ -743,6 +750,24 @@ logic lives in `src/vtap100/roundtrip.py` and is imported by both the CLI and
 between what the tests check and what the tool reports would defeat the purpose.
 
 `vtap100 anonymize` (section 5.2.1) is the second new command.
+
+### 5.5.1 Slot preservation and the ST1 rule
+
+Preserving `slot` collides with the deliberate `start=2` for Smart Tap. The
+collision resolves along the principle already set in section 5.1:
+
+- **On read**, the slot in the file is preserved exactly, `ST1` included.
+  Rewriting a user's `ST1` to `ST2` is a silent change to their configuration —
+  precisely the failure this work exists to remove. The tool does not get to
+  quietly "fix" the file it was asked to load.
+- **On create**, the TUI and CLI still default new Smart Tap entries to slot 2
+  and never offer slot 1, so the empirical finding behind `d18c8c4` keeps
+  protecting anyone building a fresh configuration.
+- **On inspection**, `validate` reports `ST1` as a warning: it is documented by
+  the manufacturer but does not work on real readers. Reporting beats rewriting.
+
+The `d18c8c4` behaviour is therefore not reverted; it moves from the generator,
+where it corrupted round-trips, to config creation, where it belongs.
 
 ### 5.6.2 What validation must not enforce
 
