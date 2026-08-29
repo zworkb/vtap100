@@ -16,7 +16,11 @@ import sys
 
 
 ALLOWED_MERCHANT_LABEL = "example"
-ALLOWED_COLLECTOR_IDS = {"12345678", "87654321"}
+# Values the manufacturer itself publishes at
+# https://www.vtapnfc.com/downloads/config.txt. Listing them here discloses
+# nothing that is not already public, and vendor_sample.txt is kept verbatim.
+ALLOWED_VENDOR_MERCHANT_IDS = {"pass.com.pronto.originpass.demo"}
+ALLOWED_COLLECTOR_IDS = {"12345678", "87654321", "80644855"}
 ALLOWED_APP_IDS = {"AABBCC"}
 ALLOWED_TCIS = {"020000", "030000", "02AB40"}
 # EXAMPLE_sys_1000 in hex — the placeholder System Identifier.
@@ -59,7 +63,11 @@ def check_file(path: Path) -> list[str]:
             # Membership of the example domain, not a fixed prefix: fixtures for
             # rejection cases carry deliberately malformed IDs such as
             # "com.example.missing-pass-prefix", which leak nothing.
-            if ALLOWED_MERCHANT_LABEL not in match.group(1).split("."):
+            merchant_id = match.group(1)
+            if (
+                ALLOWED_MERCHANT_LABEL not in merchant_id.split(".")
+                and merchant_id not in ALLOWED_VENDOR_MERCHANT_IDS
+            ):
                 problems.append(
                     f"{where}: MerchantID must contain the label "
                     f"{ALLOWED_MERCHANT_LABEL!r} (example domain only)"

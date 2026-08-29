@@ -1,0 +1,57 @@
+!VTAPconfig
+; Source: https://www.vtapnfc.com/downloads/config.txt
+; Retrieved 2026-08-29. Published by the manufacturer; contains no
+; deployment data. Before this work it lost 11 of its 19 settings.
+
+; Welcome to the VTAP100 - the world's easiest to use mobile NFC Pass reader!
+
+; To configure your device, simply edit this file to set the correct pass IDs, keys and settings
+; You can also control how the data is read, filtered and sent to the host
+; Please refer to the online user guide and command reference guide for more info
+; The default config below will read demo passes generated at originpass.com/VTAP
+; Key Slot 6 is pre-loaded with our default Dot Origin demo key, and slot 5 is Pronto's demo key
+; You can load your own key files easily - simply copy the .pem file onto the VTAP100 and reboot
+; The pem file should be named private1.pem .. private6.pem depending on the key slot to be used
+; The key will be loaded into the reader's secure element at start-up and the file deleted automatically
+; If it is not deleted then the file format/content is not recognised as a valid EC key
+
+; This section defines the Apple merchant ID and key for the pass you want to read
+VAS1MerchantID=pass.com.pronto.originpass.demo
+VAS1KeySlot=6
+
+; This section defines the Google Smart Tap collector ID and key for the pass you want to read
+ST1CollectorID=80644855
+ST1KeySlot=6
+ST1KeyVersion=1
+
+; This setting enables reading of NFC Type 2 cards and tags. The UID will be returned by default
+NFCType2=1
+
+; This section turns on the keyboard wedge/barcode scanner emulation mode
+KBLogMode=1
+KBSource=A1
+KBDelayMS=2
+KBPassMode=0
+
+; You can optionally change to KBPassMode=1 and extract just a part of the decrypted payload, like this:
+;KBPassMode=1
+;KBPassSection=2
+;KBPassStart=0
+;KBPassLength=14
+
+LEDSelect=1
+LEDDefaultRGB=1EBBCF
+PassLED=00FF00,200,1,1
+PassBeep=100,100,2
+TagLED=00FF00,200
+TagBeep=100
+
+; This section can be used to enable the virtual COM port, by changing to ComPortEnable=1
+; You will need to reboot after modifying this setting, and install appropriate drivers
+; On Windows 7 you will need the VTAP100 VCP driver that is provided on the device and online
+ComPortEnable=0
+ComPortMode=1
+ComPortSource=A1
+
+; Please visit vtap100.com for full documentation and support!
+

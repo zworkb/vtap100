@@ -51,6 +51,20 @@ class TestCheckFile:
         f.write_text("!VTAPconfig\nVAS1MerchantID=com.example.missing-pass-prefix\n")
         assert check_file(f) == []
 
+    def test_vendor_published_ids_pass(self, tmp_path: Path) -> None:
+        """The manufacturer's own published sample is not a leak.
+
+        vendor_sample.txt is kept verbatim; its identifiers come from a public
+        URL, so allowing them discloses nothing.
+        """
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "vendor.txt"
+        f.write_text(
+            "!VTAPconfig\nVAS1MerchantID=pass.com.pronto.originpass.demo\nST1CollectorID=80644855\n"
+        )
+        assert check_file(f) == []
+
     def test_unlisted_collector_id_is_rejected(self, tmp_path: Path) -> None:
         """Collector IDs must come from the placeholder set."""
         from check_fixture_leaks import check_file
