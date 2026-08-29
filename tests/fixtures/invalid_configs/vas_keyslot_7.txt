@@ -1,0 +1,3 @@
+!VTAPconfig
+VAS1MerchantID=pass.com.example.x
+VAS1KeySlot=7

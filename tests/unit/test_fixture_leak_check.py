@@ -32,12 +32,24 @@ class TestCheckFile:
         assert any("key material" in m for m in check_file(f))
 
     def test_real_merchant_id_is_rejected(self, tmp_path: Path) -> None:
-        """Merchant IDs must sit under pass.com.example."""
+        """Merchant IDs must reference the example domain."""
         from check_fixture_leaks import check_file
 
         f = tmp_path / "leak.txt"
         f.write_text("!VTAPconfig\nVAS2MerchantID=pass.de.somewhere.library-card\n")
         assert any("MerchantID" in m for m in check_file(f))
+
+    def test_malformed_but_example_merchant_id_passes(self, tmp_path: Path) -> None:
+        """A deliberately malformed ID on the example domain is a valid fixture.
+
+        The rejection corpus needs merchant IDs that fail model validation.
+        They leak nothing as long as they stay on the example domain.
+        """
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "malformed.txt"
+        f.write_text("!VTAPconfig\nVAS1MerchantID=com.example.missing-pass-prefix\n")
+        assert check_file(f) == []
 
     def test_unlisted_collector_id_is_rejected(self, tmp_path: Path) -> None:
         """Collector IDs must come from the placeholder set."""

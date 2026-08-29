@@ -15,7 +15,7 @@ import re
 import sys
 
 
-ALLOWED_MERCHANT_PREFIX = "pass.com.example."
+ALLOWED_MERCHANT_LABEL = "example"
 ALLOWED_COLLECTOR_IDS = {"12345678", "87654321"}
 ALLOWED_APP_IDS = {"AABBCC"}
 ALLOWED_TCIS = {"020000", "030000", "02AB40"}
@@ -56,8 +56,14 @@ def check_file(path: Path) -> list[str]:
         stripped = line.strip()
 
         if match := MERCHANT_ID.match(stripped):
-            if not match.group(1).startswith(ALLOWED_MERCHANT_PREFIX):
-                problems.append(f"{where}: MerchantID must start with {ALLOWED_MERCHANT_PREFIX!r}")
+            # Membership of the example domain, not a fixed prefix: fixtures for
+            # rejection cases carry deliberately malformed IDs such as
+            # "com.example.missing-pass-prefix", which leak nothing.
+            if ALLOWED_MERCHANT_LABEL not in match.group(1).split("."):
+                problems.append(
+                    f"{where}: MerchantID must contain the label "
+                    f"{ALLOWED_MERCHANT_LABEL!r} (example domain only)"
+                )
         elif match := COLLECTOR_ID.match(stripped):
             if match.group(1) not in ALLOWED_COLLECTOR_IDS:
                 problems.append(f"{where}: CollectorID is not a known placeholder")

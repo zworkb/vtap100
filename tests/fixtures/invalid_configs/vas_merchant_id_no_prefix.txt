@@ -1,0 +1,2 @@
+!VTAPconfig
+VAS1MerchantID=com.example.missing-pass-prefix

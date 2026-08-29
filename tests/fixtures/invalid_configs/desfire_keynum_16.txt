@@ -1,0 +1,3 @@
+!VTAPconfig
+DESFire1AppID=AABBCC
+DESFire1KeyNum=16

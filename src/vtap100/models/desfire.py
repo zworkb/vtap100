@@ -97,7 +97,7 @@ class DESFireAppConfig(BaseModel):
 
     app_id: str = Field(..., description="Application ID (6 hex characters)")
     file_id: int | None = Field(default=None, ge=0, le=255, description="File ID (0-255)")
-    key_num: int | None = Field(default=None, description="Key number")
+    key_num: int | None = Field(default=None, ge=0, le=15, description="Key number (0-15)")
     key_slot: int | None = Field(default=None, ge=1, le=9, description="Key slot (1-9)")
     crypto: DESFireCryptoMode | None = Field(default=None, description="Crypto mode")
     format: DESFireDataFormat | None = Field(default=None, description="Data format")
@@ -109,9 +109,15 @@ class DESFireAppConfig(BaseModel):
         le=7,
         description="Key diversification bit field (0, 1, 3, 5 or 7)",
     )
-    privacy_key_num: int | None = Field(default=None, description="Privacy key number")
-    privacy_key_slot: int | None = Field(default=None, description="Privacy key slot")
-    sysid_key_slot: int | None = Field(default=None, description="System ID key slot")
+    privacy_key_num: int | None = Field(
+        default=None, ge=0, le=15, description="Privacy key number (0-15)"
+    )
+    privacy_key_slot: int | None = Field(
+        default=None, ge=1, le=9, description="Privacy key slot (1-9)"
+    )
+    sysid_key_slot: int | None = Field(
+        default=None, ge=0, le=9, description="System ID key slot (0-9)"
+    )
     sysid_length: int | None = Field(
         default=None, ge=0, le=16, description="System ID length (0-16)"
     )

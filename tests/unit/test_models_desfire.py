@@ -537,3 +537,37 @@ class TestDiversificationBitField:
         assert DiversificationBuilder().active().omit_aid().build() == 3
         assert DiversificationBuilder().active().reverse_uid().build() == 5
         assert DiversificationBuilder().active().omit_aid().reverse_uid().build() == 7
+
+
+class TestDESFireRemainingRanges:
+    """Ranges the model left unchecked."""
+
+    @pytest.mark.parametrize(
+        ("field_name", "valid", "invalid"),
+        [
+            ("key_num", 15, 16),
+            ("sysid_key_slot", 9, 10),
+            ("privacy_key_slot", 9, 10),
+        ],
+    )
+    def test_upper_bound(self, field_name: str, valid: int, invalid: int) -> None:
+        """The documented upper bound is enforced."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        config = DESFireAppConfig(app_id="AABBCC", **{field_name: valid})
+        assert getattr(config, field_name) == valid
+        with pytest.raises(ValidationError):
+            DESFireAppConfig(app_id="AABBCC", **{field_name: invalid})
+
+    def test_privacy_key_slot_zero_is_rejected(self) -> None:
+        """Privacy key slots are 1-9; there is no 'none' value."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        with pytest.raises(ValidationError):
+            DESFireAppConfig(app_id="AABBCC", privacy_key_slot=0)
+
+    def test_sysid_key_slot_zero_is_valid(self) -> None:
+        """SysIDKeySlot=0 means 'do not use a System Identifier'."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        assert DESFireAppConfig(app_id="AABBCC", sysid_key_slot=0).sysid_key_slot == 0
