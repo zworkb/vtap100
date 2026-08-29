@@ -1,0 +1,6 @@
+!VTAPconfig
+
+; The manufacturer's own sample file uses the numeric spelling.
+NFCType2=1
+NFCType4=D
+TagReadFormat=a

@@ -182,9 +182,13 @@ class ConfigParser:
     KB_PASS_LENGTH = re.compile(r"^KBPassLength=(\d+)$")
 
     # NFC patterns
-    NFC_TYPE2 = re.compile(r"^NFCType2=([0UNBDP])$")
-    NFC_TYPE4 = re.compile(r"^NFCType4=([0UNBDP])$")
-    NFC_TYPE5 = re.compile(r"^NFCType5=([0UNBDP])$")
+    NFC_TYPE2 = re.compile(r"^NFCType2=([0123UNBDP])$")
+    NFC_TYPE4 = re.compile(r"^NFCType4=([0123UNBDP])$")
+    NFC_TYPE5 = re.compile(r"^NFCType5=([0123UNBDP])$")
+
+    # Documented equivalent spellings: "=U or =1", "=N or =2", "=B or =3".
+    # The manufacturer's own sample config.txt uses the numeric form.
+    NFC_TYPE_ALIASES = {"1": "U", "2": "N", "3": "B"}
     NFC_REPORT_READ_ERROR = re.compile(r"^NFCReportReadError=(\d+)$")
     IGNORE_RANDOM_UID = re.compile(r"^IgnoreRandomUID=(\d+)$")
     TAG_BYTE_ORDER = re.compile(r"^TagByteOrder=(\d+)$")
@@ -391,15 +395,18 @@ class ConfigParser:
     def _parse_nfc_line(self, line: str) -> bool:
         """Parse NFC-related config line."""
         if match := self.NFC_TYPE2.match(line):
-            self._nfc_data.type2 = match.group(1)
+            raw = match.group(1)
+            self._nfc_data.type2 = self.NFC_TYPE_ALIASES.get(raw, raw)
             return True
 
         if match := self.NFC_TYPE4.match(line):
-            self._nfc_data.type4 = match.group(1)
+            raw = match.group(1)
+            self._nfc_data.type4 = self.NFC_TYPE_ALIASES.get(raw, raw)
             return True
 
         if match := self.NFC_TYPE5.match(line):
-            self._nfc_data.type5 = match.group(1)
+            raw = match.group(1)
+            self._nfc_data.type5 = self.NFC_TYPE_ALIASES.get(raw, raw)
             return True
 
         if match := self.NFC_REPORT_READ_ERROR.match(line):

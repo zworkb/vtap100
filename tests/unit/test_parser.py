@@ -988,3 +988,22 @@ class TestFeedbackShortForms:
         report = compare("!VTAPconfig\nTagBeep=100\nTagLED=00FF00,200\n")
         assert report.lost == []
         assert report.changed == []
+
+
+class TestNFCTypeAliases:
+    """The manufacturer documents '=U or =1', '=N or =2', '=B or =3'."""
+
+    @pytest.mark.parametrize(("numeric", "letter"), [("1", "U"), ("2", "N"), ("3", "B")])
+    def test_numeric_alias_parses_as_letter(self, numeric: str, letter: str) -> None:
+        """Numeric spellings are accepted and normalise to the letter form."""
+        from vtap100.parser import parse
+
+        numeric_config = parse(f"!VTAPconfig\nNFCType4={numeric}\n")
+        letter_config = parse(f"!VTAPconfig\nNFCType4={letter}\n")
+        assert numeric_config.nfc.type4 == letter_config.nfc.type4
+
+    def test_numeric_alias_roundtrips(self) -> None:
+        """The alias counts as preserved even though the letter is emitted."""
+        from vtap100.roundtrip import compare
+
+        assert compare("!VTAPconfig\nNFCType2=1\n").is_lossless
