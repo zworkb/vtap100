@@ -453,6 +453,317 @@ and its subject matter is key slots."
 
 ---
 
+## Task 2b: Fixture leak check as a pre-commit hook
+
+Anonymisation must not depend on anyone remembering it. This repository is
+public, and a missed identifier is permanent — it stays in the history even
+after the file is corrected. A hook makes forgetting impossible rather than
+unlikely, and it also covers the path that never runs `anonymize` at all:
+copying a real file straight into `valid_configs/`.
+
+The check is an **allowlist, not a deny list**. A deny list would have to name
+the real merchant IDs, collector IDs and AIDs it is meant to keep out — which
+would publish them in this very file. An allowlist names only the placeholders,
+so adding a genuinely new example value is a deliberate edit, and that edit is
+exactly the moment to notice whether the value is real.
+
+**Files:**
+- Create: `scripts/check_fixture_leaks.py`
+- Create: `tests/unit/test_fixture_leak_check.py`
+- Modify: `.pre-commit-config.yaml`
+- Modify: `pyproject.toml` (`pythonpath`)
+
+**Interfaces:**
+- Produces: `check_file(path: Path) -> list[str]` returning one message per
+  violation, empty when clean; `main(argv: list[str]) -> int` returning 1 when
+  any file has a violation.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `tests/unit/test_fixture_leak_check.py`:
+
+```python
+"""Unit tests for the fixture leak check.
+
+The check is an allowlist: fixtures may only contain placeholder identifiers.
+"""
+
+import pytest
+
+
+class TestCheckFile:
+    """Violations that must be caught before a commit reaches a public repo."""
+
+    def test_clean_fixture_passes(self, tmp_path) -> None:
+        """A fixture using only placeholders is accepted."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "clean.txt"
+        f.write_text(
+            "!VTAPconfig\n"
+            "VAS2MerchantID=pass.com.example.library-card\n"
+            "ST2CollectorID=12345678\n"
+            "DESFire1AppID=AABBCC\n"
+            "AccessTCI=020000\n"
+        )
+        assert check_file(f) == []
+
+    def test_key_material_is_rejected(self, tmp_path) -> None:
+        """A PEM block must never be committed, whatever the file is called."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "leak.txt"
+        f.write_text("-----BEGIN EC PRIVATE KEY-----\nMHcCAQ\n")
+        assert any("key material" in m for m in check_file(f))
+
+    def test_real_merchant_id_is_rejected(self, tmp_path) -> None:
+        """Merchant IDs must sit under pass.com.example."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "leak.txt"
+        f.write_text("!VTAPconfig\nVAS2MerchantID=pass.de.somewhere.library-card\n")
+        messages = check_file(f)
+        assert any("MerchantID" in m for m in messages)
+
+    def test_unlisted_collector_id_is_rejected(self, tmp_path) -> None:
+        """Collector IDs must come from the placeholder set."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "leak.txt"
+        f.write_text("!VTAPconfig\nST2CollectorID=99887766\n")
+        assert any("CollectorID" in m for m in check_file(f))
+
+    def test_unlisted_app_id_is_rejected(self, tmp_path) -> None:
+        """DESFire AIDs must come from the placeholder set."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "leak.txt"
+        f.write_text("!VTAPconfig\nDESFire1AppID=D0FFEE\n")
+        assert any("AppID" in m for m in check_file(f))
+
+    def test_long_hex_in_comment_is_rejected(self, tmp_path) -> None:
+        """A System Identifier blob in a comment is still an identifier."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "leak.txt"
+        f.write_text("; SysID: 4E4F545F415F5245414C5F5359534944 (16B)\n")
+        assert any("hex" in m for m in check_file(f))
+
+    def test_placeholder_sysid_in_comment_passes(self, tmp_path) -> None:
+        """The placeholder System Identifier is allowed."""
+        from check_fixture_leaks import check_file
+
+        f = tmp_path / "clean.txt"
+        f.write_text("; SysID: 4558414D504C455F7379735F31303030 (16B)\n")
+        assert check_file(f) == []
+
+
+class TestMain:
+    """Exit code contract for pre-commit."""
+
+    def test_returns_one_when_a_file_leaks(self, tmp_path) -> None:
+        """A violation fails the commit."""
+        from check_fixture_leaks import main
+
+        f = tmp_path / "leak.txt"
+        f.write_text("-----BEGIN EC PRIVATE KEY-----\n")
+        assert main([str(f)]) == 1
+
+    def test_returns_zero_when_clean(self, tmp_path) -> None:
+        """No violation, no obstruction."""
+        from check_fixture_leaks import main
+
+        f = tmp_path / "clean.txt"
+        f.write_text("!VTAPconfig\nVAS1MerchantID=pass.com.example.x\n")
+        assert main([str(f)]) == 0
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+Run: `uv run --extra dev pytest tests/unit/test_fixture_leak_check.py -q`
+Expected: FAIL — `ModuleNotFoundError: No module named 'check_fixture_leaks'`.
+
+- [ ] **Step 3: Write the checker**
+
+Create `scripts/check_fixture_leaks.py`:
+
+```python
+"""Reject real deployment identifiers in committed test fixtures.
+
+This repository is public and its subject matter is key slots and wallet
+credentials. A deployment identifier committed by accident stays in the history
+even after the file is corrected, so the check runs as a pre-commit hook rather
+than as a step someone has to remember.
+
+The rules are an allowlist. A deny list would have to name the real identifiers
+it keeps out, publishing them in this file; an allowlist names only the
+placeholders, so introducing a new example value is a deliberate edit.
+"""
+
+from pathlib import Path
+import re
+import sys
+
+
+ALLOWED_MERCHANT_PREFIX = "pass.com.example."
+ALLOWED_COLLECTOR_IDS = {"12345678", "87654321"}
+ALLOWED_APP_IDS = {"AABBCC"}
+ALLOWED_TCIS = {"020000", "030000", "02AB40"}
+# EXAMPLE_sys_1000 in hex — the placeholder System Identifier.
+ALLOWED_HEX_BLOBS = {"4558414D504C455F7379735F31303030"}
+
+MERCHANT_ID = re.compile(r"^VAS\d*MerchantID=(.+)$")
+COLLECTOR_ID = re.compile(r"^ST\d*CollectorID=(.+)$")
+APP_ID = re.compile(r"^DESFire\d*AppID=(.+)$")
+ACCESS_TCI = re.compile(r"^AccessTCI=(.+)$")
+LONG_HEX = re.compile(r"[0-9A-Fa-f]{24,}")
+
+
+def check_file(path: Path) -> list[str]:
+    """Check one file for identifiers that must not reach a public repository.
+
+    Args:
+        path: File to inspect.
+
+    Returns:
+        One message per violation; empty when the file is clean.
+    """
+    problems: list[str] = []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return problems
+
+    for number, line in enumerate(text.splitlines(), start=1):
+        where = f"{path}:{number}"
+
+        if "-----BEGIN" in line:
+            problems.append(f"{where}: key material must never be committed")
+            continue
+
+        stripped = line.strip()
+
+        if match := MERCHANT_ID.match(stripped):
+            if not match.group(1).startswith(ALLOWED_MERCHANT_PREFIX):
+                problems.append(
+                    f"{where}: MerchantID must start with {ALLOWED_MERCHANT_PREFIX!r}"
+                )
+        elif match := COLLECTOR_ID.match(stripped):
+            if match.group(1) not in ALLOWED_COLLECTOR_IDS:
+                problems.append(f"{where}: CollectorID is not a known placeholder")
+        elif match := APP_ID.match(stripped):
+            if match.group(1).upper() not in ALLOWED_APP_IDS:
+                problems.append(f"{where}: DESFire AppID is not a known placeholder")
+        elif match := ACCESS_TCI.match(stripped):
+            if match.group(1).upper() not in ALLOWED_TCIS:
+                problems.append(f"{where}: AccessTCI is not a known placeholder")
+
+        for blob in LONG_HEX.findall(line):
+            if blob.upper() not in {b.upper() for b in ALLOWED_HEX_BLOBS}:
+                problems.append(f"{where}: long hex value is not a known placeholder")
+
+    return problems
+
+
+def main(argv: list[str]) -> int:
+    """Check every given file.
+
+    Args:
+        argv: Paths to check, as pre-commit passes them.
+
+    Returns:
+        1 if any file has a violation, otherwise 0.
+    """
+    problems: list[str] = []
+    for name in argv:
+        problems.extend(check_file(Path(name)))
+
+    for problem in problems:
+        print(problem, file=sys.stderr)
+    if problems:
+        print(
+            "\nFixtures must use placeholder identifiers only. "
+            "Run 'vtap100 anonymize' or extend the allowlist in "
+            "scripts/check_fixture_leaks.py if the value really is an example.",
+            file=sys.stderr,
+        )
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
+```
+
+Note the comment naming the AID case-insensitively: real fixtures write `AABBCC` in the settings and `aabbcc` in the generator's comment header, and both must pass.
+
+- [ ] **Step 4: Make the script importable from tests**
+
+In `pyproject.toml`, extend the pytest path so the test can import the module:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "scripts"]
+```
+
+- [ ] **Step 5: Run the test to verify it passes**
+
+Run: `uv run --extra dev pytest tests/unit/test_fixture_leak_check.py -q`
+Expected: PASS, 9 tests.
+
+- [ ] **Step 6: Wire it into pre-commit**
+
+Append to `.pre-commit-config.yaml`:
+
+```yaml
+  - repo: local
+    hooks:
+      - id: fixture-leak-check
+        name: Reject real identifiers in test fixtures
+        entry: python scripts/check_fixture_leaks.py
+        language: system
+        files: ^tests/fixtures/
+```
+
+`files:` scopes it to the fixture corpus. `local_configs/` is git-ignored and can never be staged, so the hook never sees it.
+
+- [ ] **Step 7: Verify the hook actually blocks**
+
+```bash
+printf -- '-----BEGIN EC PRIVATE KEY-----\n' > tests/fixtures/valid_configs/leak_probe.txt
+git add tests/fixtures/valid_configs/leak_probe.txt
+uv run --extra dev pre-commit run fixture-leak-check --files tests/fixtures/valid_configs/leak_probe.txt
+```
+
+Expected: the hook fails and names the file. Then remove the probe:
+
+```bash
+git restore --staged tests/fixtures/valid_configs/leak_probe.txt
+rm tests/fixtures/valid_configs/leak_probe.txt
+```
+
+Do not skip this step. A hook nobody has watched fail is a hook nobody knows works.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add scripts/check_fixture_leaks.py tests/unit/test_fixture_leak_check.py .pre-commit-config.yaml pyproject.toml
+git commit -m "test: reject real identifiers in fixtures at commit time
+
+Anonymisation was a command someone had to remember, with a manual
+grep as the only backstop. This repository is public and a leaked
+identifier stays in the history after the file is fixed, so the check
+belongs in a hook.
+
+It is an allowlist, not a deny list: a deny list would have to name
+the real merchant IDs, collector IDs and AIDs it keeps out, publishing
+them in the checker itself. An allowlist names only placeholders, so
+adding a new example value is a deliberate edit — and that edit is
+where someone notices the value is real."
+```
+
+---
+
 ## Task 3: DESFire FileID accepts 0
 
 The single constraint blocking 14 of 17 real configurations.
