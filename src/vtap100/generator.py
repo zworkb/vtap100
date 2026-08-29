@@ -93,6 +93,13 @@ class ConfigGenerator:
                 lines.extend(desfire_lines)
 
         # LED/Beep feedback settings
+        # Serial port
+        if self.config.com_port:
+            com_port_lines = self.config.com_port.to_config_lines()
+            if com_port_lines:
+                lines.append("; Serial Port")
+                lines.extend(com_port_lines)
+
         # Apple Access (ECP2)
         if self.config.access:
             access_lines = self.config.access.to_config_lines()

@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from dataclasses import field
 import re
 from vtap100.models.access import AccessConfig
+from vtap100.models.comport import ComPortConfig
 from vtap100.models.config import VTAPConfig
 from vtap100.models.desfire import DESFireAppConfig
 from vtap100.models.desfire import DESFireConfig
@@ -121,6 +122,15 @@ class _DESFireParseData:
 
     apps: dict[int, _DESFireAppParseData] = field(default_factory=dict)
     separator: str = ","
+
+
+@dataclass
+class _ComPortParseData:
+    """Temporary data structure for parsing serial port config."""
+
+    enable: bool | None = None
+    mode: int | None = None
+    source: str | None = None
 
 
 @dataclass
@@ -231,6 +241,11 @@ class ConfigParser:
     ACCESS_AUTH_REQUIRED = re.compile(r"^AccessAuthRequired=(\d+)$")
     ECP2_MODE = re.compile(r"^ECP2Mode=([ta])$")
 
+    # Serial port
+    COM_PORT_ENABLE = re.compile(r"^ComPortEnable=(\d+)$")
+    COM_PORT_MODE = re.compile(r"^ComPortMode=(\d+)$")
+    COM_PORT_SOURCE = re.compile(r"^ComPortSource=(.+)$")
+
     # LED patterns
     LED_MODE = re.compile(r"^LEDMode=(\d+)$")
     LED_SELECT = re.compile(r"^LEDSelect=(\d+)$")
@@ -259,6 +274,7 @@ class ConfigParser:
         self._nfc_data: _NFCParseData = _NFCParseData()
         self._desfire_data: _DESFireParseData = _DESFireParseData()
         self._access_data: _AccessParseData = _AccessParseData()
+        self._comport_data: _ComPortParseData = _ComPortParseData()
         self._led_data: _LEDParseData = _LEDParseData()
         self._beep_data: _BeepParseData = _BeepParseData()
 
@@ -312,6 +328,10 @@ class ConfigParser:
 
         # DESFire configuration
         if self._parse_desfire_line(line):
+            return
+
+        # Serial port configuration
+        if self._parse_comport_line(line):
             return
 
         # Apple Access configuration
@@ -545,6 +565,22 @@ class ConfigParser:
 
         return False
 
+    def _parse_comport_line(self, line: str) -> bool:
+        """Parse a serial port config line."""
+        if match := self.COM_PORT_ENABLE.match(line):
+            self._comport_data.enable = match.group(1) == "1"
+            return True
+
+        if match := self.COM_PORT_MODE.match(line):
+            self._comport_data.mode = int(match.group(1))
+            return True
+
+        if match := self.COM_PORT_SOURCE.match(line):
+            self._comport_data.source = match.group(1)
+            return True
+
+        return False
+
     def _parse_access_line(self, line: str) -> bool:
         """Parse an Apple Access config line."""
         if match := self.ACCESS_TCI.match(line):
@@ -708,6 +744,12 @@ class ConfigParser:
                 ecp2_mode=acc.ecp2_mode,
             )
 
+        # Build serial port config
+        com_port = None
+        cp = self._comport_data
+        if any(v is not None for v in (cp.enable, cp.mode, cp.source)):
+            com_port = ComPortConfig(enable=cp.enable, mode=cp.mode, source=cp.source)
+
         # Build NFC config
         nfc = self._build_nfc_config()
 
@@ -724,6 +766,7 @@ class ConfigParser:
             nfc=nfc,
             desfire=desfire,
             access=access,
+            com_port=com_port,
             feedback=feedback,
         )
 
