@@ -174,7 +174,7 @@ class KeyboardConfigForm(BaseConfigForm):
         # Postfix
         yield Label(t("forms.keyboard.postfix"))
         yield Input(
-            value=self._config.postfix,
+            value=self._config.postfix or "",
             placeholder=t("forms.keyboard.postfix_placeholder"),
             id="postfix",
         )
@@ -182,7 +182,7 @@ class KeyboardConfigForm(BaseConfigForm):
         # Delay
         yield Label(t("forms.keyboard.delay_ms"))
         yield Input(
-            value=str(self._config.delay_ms),
+            value="" if self._config.delay_ms is None else str(self._config.delay_ms),
             placeholder=t("forms.keyboard.delay_ms_placeholder"),
             id="delay_ms",
         )
@@ -215,9 +215,10 @@ class KeyboardConfigForm(BaseConfigForm):
         source = self._get_source_value()
         prefix_val = self.query_one("#prefix", Input).value
         prefix = prefix_val if prefix_val else None
-        postfix = self.query_one("#postfix", Input).value
+        postfix_val = self.query_one("#postfix", Input).value
+        postfix = postfix_val if postfix_val else None
         delay_str = self.query_one("#delay_ms", Input).value
-        delay_ms = int(delay_str) if delay_str else 5
+        delay_ms = int(delay_str) if delay_str else None
 
         return KeyboardConfig(
             log_mode=log_mode,

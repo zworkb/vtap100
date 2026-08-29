@@ -48,9 +48,9 @@ class KeyboardConfig(BaseModel):
         default=False,
         description="Enable keyboard emulation (KBLogMode)",
     )
-    enable: bool = Field(
-        default=True,
-        description="Enable USB keyboard device function (KBEnable)",
+    enable: bool | None = Field(
+        default=None,
+        description="Enable the USB keyboard device (KBEnable, reader default 1)",
     )
     source: str = Field(
         default="A5",
@@ -58,40 +58,47 @@ class KeyboardConfig(BaseModel):
     )
     prefix: str | None = Field(
         default=None,
-        description="Prefix before data (KBPrefix), e.g., '$t' for timestamp",
+        max_length=80,
+        description="Keystrokes sent before the data (KBPrefix)",
     )
-    postfix: str = Field(
-        default="%0A",
-        description="Suffix after data (KBPostfix), default is newline",
+    postfix: str | None = Field(
+        default=None,
+        max_length=80,
+        description="Keystrokes sent after the data (KBPostfix, reader default %0A)",
     )
-    delay_ms: int = Field(
-        default=5,
-        ge=5,
+    delay_ms: int | None = Field(
+        default=None,
+        ge=0,
         le=255,
-        description="Delay between keystrokes in ms (KBDelayMS)",
+        description=(
+            "Inter-keystroke delay in ms (KBDelayMS). Parsing accepts 0-255; the "
+            "manufacturer documents 5-255 and its own sample file uses 2."
+        ),
     )
-    pass_mode: bool = Field(
-        default=False,
-        description="Enable pass payload extraction (KBPassMode)",
+    pass_mode: bool | None = Field(
+        default=None,
+        description="Extract a delimited section (KBPassMode)",
     )
-    pass_section: int = Field(
-        default=0,
+    pass_section: int | None = Field(
+        default=None,
         ge=0,
-        description="Which section to extract (KBPassSection)",
+        description="Section number to read (KBPassSection)",
     )
-    pass_separator: str = Field(
-        default="|",
-        description="Separator character for sections (KBPassSeparator)",
+    pass_separator: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=1,
+        description="Section separator character (KBPassSeparator)",
     )
-    pass_start: int = Field(
-        default=0,
+    pass_start: int | None = Field(
+        default=None,
         ge=0,
-        description="Start position for extraction (KBPassStart)",
+        description="First character to read (KBPassStart)",
     )
-    pass_length: int = Field(
-        default=0,
+    pass_length: int | None = Field(
+        default=None,
         ge=0,
-        description="Length of extraction, 0 = all (KBPassLength)",
+        description="Number of characters to read (KBPassLength)",
     )
 
     def to_config_lines(self) -> list[str]:
@@ -102,48 +109,37 @@ class KeyboardConfig(BaseModel):
         """
         lines: list[str] = []
 
-        # Always include KBLogMode
         lines.append(f"KBLogMode={1 if self.log_mode else 0}")
 
-        # Include KBEnable only if disabled (default is enabled)
-        if not self.enable:
-            lines.append("KBEnable=0")
+        if self.enable is not None:
+            lines.append(f"KBEnable={1 if self.enable else 0}")
 
-        # Include KBSource if not default or if log_mode is enabled
         if self.source != "A5" or self.log_mode:
             lines.append(f"KBSource={self.source}")
 
-        # Include prefix if set
         if self.prefix is not None:
             lines.append(f"KBPrefix={self.prefix}")
 
-        # Include postfix only if not default (%0A)
-        if self.postfix != "%0A":
+        if self.postfix is not None:
             lines.append(f"KBPostfix={self.postfix}")
 
-        # Include delay only if not default (5ms)
-        if self.delay_ms != 5:
+        if self.delay_ms is not None:
             lines.append(f"KBDelayMS={self.delay_ms}")
 
-        # Pass extraction settings (only if pass_mode is enabled)
-        if self.pass_mode:
-            lines.append("KBPassMode=1")
+        if self.pass_mode is not None:
+            lines.append(f"KBPassMode={1 if self.pass_mode else 0}")
 
-            # Include pass_section only if not default (0)
-            if self.pass_section != 0:
-                lines.append(f"KBPassSection={self.pass_section}")
+        if self.pass_section is not None:
+            lines.append(f"KBPassSection={self.pass_section}")
 
-            # Include pass_separator only if not default (|)
-            if self.pass_separator != "|":
-                lines.append(f"KBPassSeparator={self.pass_separator}")
+        if self.pass_separator is not None:
+            lines.append(f"KBPassSeparator={self.pass_separator}")
 
-            # Include pass_start only if not default (0)
-            if self.pass_start != 0:
-                lines.append(f"KBPassStart={self.pass_start}")
+        if self.pass_start is not None:
+            lines.append(f"KBPassStart={self.pass_start}")
 
-            # Include pass_length only if not default (0)
-            if self.pass_length != 0:
-                lines.append(f"KBPassLength={self.pass_length}")
+        if self.pass_length is not None:
+            lines.append(f"KBPassLength={self.pass_length}")
 
         return lines
 

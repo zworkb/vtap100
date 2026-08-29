@@ -64,6 +64,15 @@ class _KeyboardParseData:
 
     log_mode: bool | None = None
     source: str | None = None
+    enable: bool | None = None
+    prefix: str | None = None
+    postfix: str | None = None
+    delay_ms: int | None = None
+    pass_mode: bool | None = None
+    pass_section: int | None = None
+    pass_separator: str | None = None
+    pass_start: int | None = None
+    pass_length: int | None = None
 
 
 @dataclass
@@ -161,6 +170,16 @@ class ConfigParser:
     # Keyboard patterns
     KB_LOG_MODE = re.compile(r"^KBLogMode=(\d+)$")
     KB_SOURCE = re.compile(r"^KBSource=(.+)$")
+    KB_ENABLE = re.compile(r"^KBEnable=(\d+)$")
+    # (.*) rather than (.+): an empty prefix/postfix is a value, not an absence.
+    KB_PREFIX = re.compile(r"^KBPrefix=(.*)$")
+    KB_POSTFIX = re.compile(r"^KBPostfix=(.*)$")
+    KB_DELAY_MS = re.compile(r"^KBDelayMS=(\d+)$")
+    KB_PASS_MODE = re.compile(r"^KBPassMode=(\d+)$")
+    KB_PASS_SECTION = re.compile(r"^KBPassSection=(\d+)$")
+    KB_PASS_SEPARATOR = re.compile(r"^KBPassSeparator=(.)$")
+    KB_PASS_START = re.compile(r"^KBPassStart=(\d+)$")
+    KB_PASS_LENGTH = re.compile(r"^KBPassLength=(\d+)$")
 
     # NFC patterns
     NFC_TYPE2 = re.compile(r"^NFCType2=([0UNBDP])$")
@@ -325,6 +344,42 @@ class ConfigParser:
         """Parse Keyboard-related config line."""
         if match := self.KB_LOG_MODE.match(line):
             self._keyboard_data.log_mode = match.group(1) == "1"
+            return True
+
+        if match := self.KB_ENABLE.match(line):
+            self._keyboard_data.enable = match.group(1) == "1"
+            return True
+
+        if match := self.KB_DELAY_MS.match(line):
+            self._keyboard_data.delay_ms = int(match.group(1))
+            return True
+
+        if match := self.KB_PASS_MODE.match(line):
+            self._keyboard_data.pass_mode = match.group(1) == "1"
+            return True
+
+        if match := self.KB_PASS_SECTION.match(line):
+            self._keyboard_data.pass_section = int(match.group(1))
+            return True
+
+        if match := self.KB_PASS_SEPARATOR.match(line):
+            self._keyboard_data.pass_separator = match.group(1)
+            return True
+
+        if match := self.KB_PASS_START.match(line):
+            self._keyboard_data.pass_start = int(match.group(1))
+            return True
+
+        if match := self.KB_PASS_LENGTH.match(line):
+            self._keyboard_data.pass_length = int(match.group(1))
+            return True
+
+        if match := self.KB_PREFIX.match(line):
+            self._keyboard_data.prefix = match.group(1)
+            return True
+
+        if match := self.KB_POSTFIX.match(line):
+            self._keyboard_data.postfix = match.group(1)
             return True
 
         if match := self.KB_SOURCE.match(line):
@@ -569,10 +624,35 @@ class ConfigParser:
                 )
 
         # Build Keyboard config
-        if self._keyboard_data.log_mode is not None or self._keyboard_data.source is not None:
+        kb = self._keyboard_data
+        if any(
+            value is not None
+            for value in (
+                kb.log_mode,
+                kb.enable,
+                kb.source,
+                kb.prefix,
+                kb.postfix,
+                kb.delay_ms,
+                kb.pass_mode,
+                kb.pass_section,
+                kb.pass_separator,
+                kb.pass_start,
+                kb.pass_length,
+            )
+        ):
             keyboard = KeyboardConfig(
-                log_mode=self._keyboard_data.log_mode or False,
-                source=self._keyboard_data.source or "A5",
+                log_mode=kb.log_mode or False,
+                enable=kb.enable,
+                source=kb.source or "A5",
+                prefix=kb.prefix,
+                postfix=kb.postfix,
+                delay_ms=kb.delay_ms,
+                pass_mode=kb.pass_mode,
+                pass_section=kb.pass_section,
+                pass_separator=kb.pass_separator,
+                pass_start=kb.pass_start,
+                pass_length=kb.pass_length,
             )
 
         # Build NFC config

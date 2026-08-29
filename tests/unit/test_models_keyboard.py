@@ -19,7 +19,7 @@ class TestKeyboardConfig:
 
         config = KeyboardConfig()
         assert config.log_mode is False  # KBLogMode=0 by default
-        assert config.enable is True  # KBEnable=1 by default
+        assert config.enable is None  # absent unless the file sets it
         assert config.source == "A5"  # Default source
 
     def test_keyboard_config_log_mode_enabled(self) -> None:
@@ -296,11 +296,15 @@ class TestKeyboardConfigExtended:
         assert config.prefix == "$t"
 
     def test_keyboard_postfix_default(self) -> None:
-        """Postfix should default to %0A (newline)."""
+        """Postfix is absent unless the file sets it.
+
+        The reader's own default is %0A. Keeping the model value None is what
+        lets an explicit KBPostfix=%0A survive a round-trip.
+        """
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.postfix == "%0A"
+        assert config.postfix is None
 
     def test_keyboard_postfix_custom(self) -> None:
         """Can set custom postfix."""
@@ -310,14 +314,14 @@ class TestKeyboardConfigExtended:
         assert config.postfix == "%0D%0A"
 
     def test_keyboard_delay_default(self) -> None:
-        """Delay should default to 5ms."""
+        """Delay is absent unless the file sets it (reader default 5ms)."""
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.delay_ms == 5
+        assert config.delay_ms is None
 
     def test_keyboard_delay_valid_range(self) -> None:
-        """Delay must be between 5 and 255."""
+        """Delay is accepted across the technically valid range."""
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig(delay_ms=5)
@@ -329,12 +333,16 @@ class TestKeyboardConfigExtended:
         config = KeyboardConfig(delay_ms=100)
         assert config.delay_ms == 100
 
-    def test_keyboard_delay_below_min_fails(self) -> None:
-        """Delay below 5 should fail validation."""
+    def test_keyboard_delay_below_documented_min_is_accepted(self) -> None:
+        """Delay below 5 parses.
+
+        The manufacturer documents 5-255 but ships a sample config.txt using
+        KBDelayMS=2. Parsing is tolerant so that file loads; the strict bound
+        belongs on the TUI input, not on the model.
+        """
         from vtap100.models.keyboard import KeyboardConfig
 
-        with pytest.raises(ValidationError):
-            KeyboardConfig(delay_ms=4)
+        assert KeyboardConfig(delay_ms=2).delay_ms == 2
 
     def test_keyboard_delay_above_max_fails(self) -> None:
         """Delay above 255 should fail validation."""
@@ -344,11 +352,11 @@ class TestKeyboardConfigExtended:
             KeyboardConfig(delay_ms=256)
 
     def test_keyboard_pass_mode_default(self) -> None:
-        """Pass mode should be disabled by default."""
+        """Pass mode is absent unless the file sets it (reader default off)."""
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.pass_mode is False
+        assert config.pass_mode is None
 
     def test_keyboard_pass_mode_enabled(self) -> None:
         """Can enable pass mode for payload extraction."""
@@ -358,11 +366,11 @@ class TestKeyboardConfigExtended:
         assert config.pass_mode is True
 
     def test_keyboard_pass_section_default(self) -> None:
-        """Pass section should default to 0."""
+        """Pass section is absent unless the file sets it (reader default 0)."""
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.pass_section == 0
+        assert config.pass_section is None
 
     def test_keyboard_pass_section_custom(self) -> None:
         """Can set custom pass section."""
@@ -376,7 +384,7 @@ class TestKeyboardConfigExtended:
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.pass_separator == "|"
+        assert config.pass_separator is None
 
     def test_keyboard_pass_separator_custom(self) -> None:
         """Can set custom pass separator."""
@@ -390,7 +398,7 @@ class TestKeyboardConfigExtended:
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.pass_start == 0
+        assert config.pass_start is None
 
     def test_keyboard_pass_start_custom(self) -> None:
         """Can set custom pass start position."""
@@ -404,7 +412,7 @@ class TestKeyboardConfigExtended:
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig()
-        assert config.pass_length == 0
+        assert config.pass_length is None
 
     def test_keyboard_pass_length_custom(self) -> None:
         """Can set custom pass length."""
@@ -454,14 +462,14 @@ class TestKeyboardConfigExtendedOutput:
 
         assert "KBDelayMS=50" in lines
 
-    def test_to_config_lines_default_delay_not_included(self) -> None:
-        """Default delay (5ms) should not be in output."""
+    def test_to_config_lines_explicit_delay_is_included(self) -> None:
+        """An explicitly set delay is emitted even when it equals the default."""
         from vtap100.models.keyboard import KeyboardConfig
 
         config = KeyboardConfig(log_mode=True, delay_ms=5)
         lines = config.to_config_lines()
 
-        assert not any("KBDelayMS" in line for line in lines)
+        assert "KBDelayMS=5" in lines
 
     def test_to_config_lines_with_pass_mode(self) -> None:
         """Enabled pass mode should generate KBPassMode=1."""

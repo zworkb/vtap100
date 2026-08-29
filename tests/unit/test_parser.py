@@ -912,3 +912,49 @@ class TestDiversificationRoundTrip:
         text = f"!VTAPconfig\nDESFire1AppID=AABBCC\nDESFire1Diversification={value}\n"
         out = ConfigGenerator(parse(text)).generate()
         assert f"DESFire1Diversification={value}" in out
+
+
+class TestKeyboardCompleteness:
+    """All eleven KB settings must be parsed and preserved."""
+
+    KB_CONFIG = (
+        "!VTAPconfig\n"
+        "KBLogMode=1\n"
+        "KBEnable=1\n"
+        "KBSource=81\n"
+        "KBPrefix=%09\n"
+        "KBPostfix=%0D\n"
+        "KBDelayMS=2\n"
+        "KBPassMode=1\n"
+        "KBPassSection=2\n"
+        "KBPassSeparator=;\n"
+        "KBPassStart=3\n"
+        "KBPassLength=14\n"
+    )
+
+    def test_postfix_is_parsed(self) -> None:
+        """KBPostfix=%0D must not be read as the %0A default."""
+        from vtap100.parser import parse
+
+        assert parse(self.KB_CONFIG).keyboard.postfix == "%0D"
+
+    def test_delay_below_documented_minimum_is_preserved(self) -> None:
+        """Parsing is tolerant: the manufacturer's own sample uses 2."""
+        from vtap100.parser import parse
+
+        assert parse(self.KB_CONFIG).keyboard.delay_ms == 2
+
+    def test_all_settings_survive_a_roundtrip(self) -> None:
+        """No keyboard setting is lost."""
+        from vtap100.roundtrip import compare
+
+        report = compare(self.KB_CONFIG)
+        assert report.lost == []
+        assert report.changed == []
+
+    def test_explicitly_set_default_is_preserved(self) -> None:
+        """An explicit KBPostfix=%0A must keep its line."""
+        from vtap100.roundtrip import compare
+
+        report = compare("!VTAPconfig\nKBLogMode=1\nKBPostfix=%0A\n")
+        assert report.lost == []

@@ -1,0 +1,16 @@
+!VTAPconfig
+
+; All eleven keyboard settings. KBDelayMS=2 is below the documented
+; minimum of 5 and appears in the manufacturer's own sample file, so
+; parsing preserves it rather than rejecting or clamping it.
+KBLogMode=1
+KBEnable=1
+KBSource=81
+KBPrefix=%09
+KBPostfix=%0D
+KBDelayMS=2
+KBPassMode=1
+KBPassSection=2
+KBPassSeparator=;
+KBPassStart=3
+KBPassLength=14
