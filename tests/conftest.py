@@ -69,3 +69,9 @@ def sample_keyboard_config() -> dict:
         "log_mode": True,
         "source": "A1",
     }
+
+
+@pytest.fixture
+def local_configs_dir(fixtures_dir: Path) -> Path:
+    """Return path to the git-ignored private config corpus."""
+    return fixtures_dir / "local_configs"

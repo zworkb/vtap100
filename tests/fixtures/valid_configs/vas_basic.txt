@@ -1,0 +1,5 @@
+!VTAPconfig
+
+; A single Apple VAS pass in slot 1.
+VAS1MerchantID=pass.com.example.basic
+VAS1KeySlot=1

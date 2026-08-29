@@ -77,6 +77,11 @@ dmypy.json
 # Generated config files (user should not commit these)
 config.txt
 
+# Key material — never commit
+*.pem
+*.key
+appkey*.txt
+
 # Generated version file (hatch-vcs)
 src/vtap100/_version.py
 

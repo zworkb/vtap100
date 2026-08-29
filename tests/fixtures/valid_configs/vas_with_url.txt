@@ -1,0 +1,6 @@
+!VTAPconfig
+
+; MerchantURL is optional and already supported today.
+VAS1MerchantID=pass.com.example.basic
+VAS1KeySlot=1
+VAS1MerchantURL=https://example.com/pass
