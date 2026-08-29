@@ -15,6 +15,7 @@ Example:
 
 from pydantic import BaseModel
 from pydantic import Field
+from vtap100.models.access import AccessConfig
 from vtap100.models.desfire import DESFireConfig
 from vtap100.models.feedback import FeedbackConfig
 from vtap100.models.keyboard import KeyboardConfig
@@ -44,6 +45,7 @@ class VTAPConfig(BaseModel):
         keyboard: Keyboard emulation configuration.
         nfc: NFC tag reading configuration.
         desfire: MIFARE DESFire configuration.
+        access: Apple Access (ECP2) configuration.
         feedback: LED and Beep feedback configuration.
     """
 
@@ -76,6 +78,10 @@ class VTAPConfig(BaseModel):
     desfire: DESFireConfig | None = Field(
         default=None,
         description="MIFARE DESFire configuration",
+    )
+    access: AccessConfig | None = Field(
+        default=None,
+        description="Apple Access (ECP2) configuration",
     )
     feedback: FeedbackConfig | None = Field(
         default=None,

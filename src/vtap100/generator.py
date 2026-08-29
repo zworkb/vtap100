@@ -93,6 +93,13 @@ class ConfigGenerator:
                 lines.extend(desfire_lines)
 
         # LED/Beep feedback settings
+        # Apple Access (ECP2)
+        if self.config.access:
+            access_lines = self.config.access.to_config_lines()
+            if access_lines:
+                lines.append("; Apple Access (ECP2)")
+                lines.extend(access_lines)
+
         if self.config.feedback:
             feedback_lines = self.config.feedback.to_config_lines()
             if feedback_lines:

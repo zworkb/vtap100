@@ -1,0 +1,14 @@
+!VTAPconfig
+
+; AccessTCI puts the reader in ECP2 mode. It does not disable VAS:
+; the three ecosystems coexist in production configurations.
+VAS2MerchantID=pass.com.example.library-card
+VAS2KeySlot=2
+
+NFCType4=D
+DESFire1AppID=AABBCC
+DESFire1FileID=0
+DESFire1KeySlot=2
+
+AccessTCI=020000
+AccessAuthRequired=0

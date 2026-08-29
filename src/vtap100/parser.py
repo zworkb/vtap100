@@ -18,6 +18,7 @@ Example:
 from dataclasses import dataclass
 from dataclasses import field
 import re
+from vtap100.models.access import AccessConfig
 from vtap100.models.config import VTAPConfig
 from vtap100.models.desfire import DESFireAppConfig
 from vtap100.models.desfire import DESFireConfig
@@ -123,6 +124,15 @@ class _DESFireParseData:
 
 
 @dataclass
+class _AccessParseData:
+    """Temporary data structure for parsing Apple Access config."""
+
+    tci: str | None = None
+    auth_required: bool | None = None
+    ecp2_mode: str | None = None
+
+
+@dataclass
 class _LEDParseData:
     """Temporary data structure for parsing LED config."""
 
@@ -216,6 +226,11 @@ class ConfigParser:
     DESFIRE_SYSID_LENGTH = re.compile(r"^DESFire(\d*)SysIDLength=(\d+)$")
     DESFIRE_SEPARATOR = re.compile(r"^DESFireSeparator=(.+)$")
 
+    # Apple Access (ECP2)
+    ACCESS_TCI = re.compile(r"^AccessTCI=([0-9A-Fa-f]+)$")
+    ACCESS_AUTH_REQUIRED = re.compile(r"^AccessAuthRequired=(\d+)$")
+    ECP2_MODE = re.compile(r"^ECP2Mode=([ta])$")
+
     # LED patterns
     LED_MODE = re.compile(r"^LEDMode=(\d+)$")
     LED_SELECT = re.compile(r"^LEDSelect=(\d+)$")
@@ -243,6 +258,7 @@ class ConfigParser:
         self._keyboard_data: _KeyboardParseData = _KeyboardParseData()
         self._nfc_data: _NFCParseData = _NFCParseData()
         self._desfire_data: _DESFireParseData = _DESFireParseData()
+        self._access_data: _AccessParseData = _AccessParseData()
         self._led_data: _LEDParseData = _LEDParseData()
         self._beep_data: _BeepParseData = _BeepParseData()
 
@@ -296,6 +312,10 @@ class ConfigParser:
 
         # DESFire configuration
         if self._parse_desfire_line(line):
+            return
+
+        # Apple Access configuration
+        if self._parse_access_line(line):
             return
 
         # LED configuration
@@ -525,6 +545,22 @@ class ConfigParser:
 
         return False
 
+    def _parse_access_line(self, line: str) -> bool:
+        """Parse an Apple Access config line."""
+        if match := self.ACCESS_TCI.match(line):
+            self._access_data.tci = match.group(1)
+            return True
+
+        if match := self.ACCESS_AUTH_REQUIRED.match(line):
+            self._access_data.auth_required = match.group(1) == "1"
+            return True
+
+        if match := self.ECP2_MODE.match(line):
+            self._access_data.ecp2_mode = match.group(1)
+            return True
+
+        return False
+
     def _parse_led_line(self, line: str) -> bool:
         """Parse LED-related config line."""
         if match := self.LED_MODE.match(line):
@@ -662,6 +698,16 @@ class ConfigParser:
                 pass_length=kb.pass_length,
             )
 
+        # Build Apple Access config
+        access = None
+        acc = self._access_data
+        if any(v is not None for v in (acc.tci, acc.auth_required, acc.ecp2_mode)):
+            access = AccessConfig(
+                tci=acc.tci,
+                auth_required=acc.auth_required,
+                ecp2_mode=acc.ecp2_mode,
+            )
+
         # Build NFC config
         nfc = self._build_nfc_config()
 
@@ -677,6 +723,7 @@ class ConfigParser:
             keyboard=keyboard,
             nfc=nfc,
             desfire=desfire,
+            access=access,
             feedback=feedback,
         )
 
