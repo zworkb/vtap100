@@ -5,8 +5,8 @@ must name the field responsible — not merely be some error.
 """
 
 from pathlib import Path
-import pytest
 from pydantic import ValidationError
+import pytest
 from vtap100.parser import parse
 
 
