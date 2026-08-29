@@ -42,8 +42,8 @@ class LEDSequence(BaseModel):
 
     color: str = Field(..., description="RGB color (6 hex chars)")
     on_ms: int = Field(default=100, ge=0, le=65535, description="On time in ms")
-    off_ms: int = Field(default=100, ge=0, le=65535, description="Off time in ms")
-    repeats: int = Field(default=1, ge=1, le=255, description="Number of repeats")
+    off_ms: int | None = Field(default=None, ge=0, le=65535, description="Off time in ms")
+    repeats: int | None = Field(default=None, ge=1, le=255, description="Number of repeats")
 
     @field_validator("color")
     @classmethod
@@ -61,8 +61,17 @@ class LEDSequence(BaseModel):
         return v.upper()
 
     def to_config_value(self) -> str:
-        """Generate config value format: color,on,off,repeats."""
-        return f"{self.color},{self.on_ms},{self.off_ms},{self.repeats}"
+        """Generate config value: color,on[,off[,repeats]].
+
+        Trailing parameters may be omitted, which the manufacturer documents
+        and its own TagLED example uses. A short form is written back short.
+        """
+        parts = [self.color, str(self.on_ms)]
+        if self.off_ms is not None:
+            parts.append(str(self.off_ms))
+            if self.repeats is not None:
+                parts.append(str(self.repeats))
+        return ",".join(parts)
 
 
 class BeepSequence(BaseModel):
@@ -76,18 +85,26 @@ class BeepSequence(BaseModel):
     """
 
     on_ms: int = Field(default=100, ge=0, le=65535, description="On time in ms")
-    off_ms: int = Field(default=100, ge=0, le=65535, description="Off time in ms")
-    repeats: int = Field(default=1, ge=1, le=255, description="Number of repeats")
+    off_ms: int | None = Field(default=None, ge=0, le=65535, description="Off time in ms")
+    repeats: int | None = Field(default=None, ge=1, le=255, description="Number of repeats")
     frequency: int | None = Field(
         default=None, ge=100, le=20000, description="Frequency in Hz (100-20000)"
     )
 
     def to_config_value(self) -> str:
-        """Generate config value format: on,off,repeats[,freq]."""
-        base = f"{self.on_ms},{self.off_ms},{self.repeats}"
-        if self.frequency is not None:
-            return f"{base},{self.frequency}"
-        return base
+        """Generate config value: on[,off[,repeats[,freq]]].
+
+        The manufacturer documents omitting "the interval between beeps and
+        number of repeats, for a single beep of the specified duration".
+        """
+        parts = [str(self.on_ms)]
+        if self.off_ms is not None:
+            parts.append(str(self.off_ms))
+            if self.repeats is not None:
+                parts.append(str(self.repeats))
+                if self.frequency is not None:
+                    parts.append(str(self.frequency))
+        return ",".join(parts)
 
 
 class LEDConfig(BaseModel):

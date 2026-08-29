@@ -70,14 +70,18 @@ class TestLEDSequence:
     """Tests for LEDSequence model (color,on,off,repeats)."""
 
     def test_led_sequence_defaults(self) -> None:
-        """LED sequence should have sensible defaults."""
+        """Trailing sequence fields are absent unless the file sets them.
+
+        The manufacturer documents omitting them, and its own TagLED example
+        is two-valued, so a short form must round-trip as a short form.
+        """
         from vtap100.models.feedback import LEDSequence
 
         seq = LEDSequence(color="00FF00")
         assert seq.color == "00FF00"
         assert seq.on_ms == 100
-        assert seq.off_ms == 100
-        assert seq.repeats == 1
+        assert seq.off_ms is None
+        assert seq.repeats is None
 
     def test_led_sequence_color_required(self) -> None:
         """Color is required."""
@@ -90,10 +94,10 @@ class TestLEDSequence:
         """Color must be 6 hex characters."""
         from vtap100.models.feedback import LEDSequence
 
-        seq = LEDSequence(color="FF0000")
+        seq = LEDSequence(color="FF0000", on_ms=100, off_ms=100, repeats=1)
         assert seq.color == "FF0000"
 
-        seq = LEDSequence(color="00ff00")
+        seq = LEDSequence(color="00ff00", on_ms=100, off_ms=100, repeats=1)
         assert seq.color == "00FF00"  # Should be uppercased
 
     def test_led_sequence_color_invalid_length(self) -> None:
@@ -173,13 +177,13 @@ class TestBeepSequence:
     """Tests for BeepSequence model (on,off,repeats[,freq])."""
 
     def test_beep_sequence_defaults(self) -> None:
-        """Beep sequence should have sensible defaults."""
+        """Trailing sequence fields are absent unless the file sets them."""
         from vtap100.models.feedback import BeepSequence
 
         seq = BeepSequence()
         assert seq.on_ms == 100
-        assert seq.off_ms == 100
-        assert seq.repeats == 1
+        assert seq.off_ms is None
+        assert seq.repeats is None
         assert seq.frequency is None
 
     def test_beep_sequence_on_ms_range(self) -> None:
@@ -333,7 +337,7 @@ class TestLEDConfig:
         from vtap100.models.feedback import LEDConfig
         from vtap100.models.feedback import LEDSequence
 
-        seq = LEDSequence(color="0000FF")
+        seq = LEDSequence(color="0000FF", on_ms=100, off_ms=100, repeats=1)
         config = LEDConfig(tag_led=seq)
         assert config.tag_led == seq
 
@@ -342,7 +346,7 @@ class TestLEDConfig:
         from vtap100.models.feedback import LEDConfig
         from vtap100.models.feedback import LEDSequence
 
-        seq = LEDSequence(color="FF0000")
+        seq = LEDSequence(color="FF0000", on_ms=100, off_ms=100, repeats=1)
         config = LEDConfig(pass_error_led=seq)
         assert config.pass_error_led == seq
 
@@ -351,7 +355,7 @@ class TestLEDConfig:
         from vtap100.models.feedback import LEDConfig
         from vtap100.models.feedback import LEDSequence
 
-        seq = LEDSequence(color="FFFF00")
+        seq = LEDSequence(color="FFFF00", on_ms=100, off_ms=100, repeats=1)
         config = LEDConfig(start_led=seq)
         assert config.start_led == seq
 
@@ -433,7 +437,7 @@ class TestFeedbackConfig:
         from vtap100.models.feedback import BeepSequence
         from vtap100.models.feedback import FeedbackConfig
 
-        beep = BeepConfig(pass_beep=BeepSequence())
+        beep = BeepConfig(pass_beep=BeepSequence(on_ms=100, off_ms=100, repeats=1))
         config = FeedbackConfig(beep=beep)
         assert config.beep == beep
 
@@ -490,7 +494,7 @@ class TestLEDConfigOutput:
         from vtap100.models.feedback import LEDConfig
         from vtap100.models.feedback import LEDSequence
 
-        config = LEDConfig(tag_led=LEDSequence(color="0000FF"))
+        config = LEDConfig(tag_led=LEDSequence(color="0000FF", on_ms=100, off_ms=100, repeats=1))
         lines = config.to_config_lines()
         assert "TagLED=0000FF,100,100,1" in lines
 
@@ -499,7 +503,9 @@ class TestLEDConfigOutput:
         from vtap100.models.feedback import LEDConfig
         from vtap100.models.feedback import LEDSequence
 
-        config = LEDConfig(pass_error_led=LEDSequence(color="FF0000"))
+        config = LEDConfig(
+            pass_error_led=LEDSequence(color="FF0000", on_ms=100, off_ms=100, repeats=1)
+        )
         lines = config.to_config_lines()
         assert "PassErrorLED=FF0000,100,100,1" in lines
 
@@ -508,7 +514,7 @@ class TestLEDConfigOutput:
         from vtap100.models.feedback import LEDConfig
         from vtap100.models.feedback import LEDSequence
 
-        config = LEDConfig(start_led=LEDSequence(color="FFFF00"))
+        config = LEDConfig(start_led=LEDSequence(color="FFFF00", on_ms=100, off_ms=100, repeats=1))
         lines = config.to_config_lines()
         assert "StartLED=FFFF00,100,100,1" in lines
 
@@ -524,9 +530,9 @@ class TestLEDConfigOutput:
             select=LEDSelect.ONBOARD_COMPACT,
             default_rgb="FFFFFF",
             pass_led=LEDSequence(color="00FF00", on_ms=100, off_ms=100, repeats=2),
-            tag_led=LEDSequence(color="0000FF"),
+            tag_led=LEDSequence(color="0000FF", on_ms=100, off_ms=100, repeats=1),
             pass_error_led=LEDSequence(color="FF0000", on_ms=200, off_ms=100, repeats=3),
-            start_led=LEDSequence(color="FFFF00"),
+            start_led=LEDSequence(color="FFFF00", on_ms=100, off_ms=100, repeats=1),
         )
         lines = config.to_config_lines()
 
@@ -575,7 +581,7 @@ class TestBeepConfigOutput:
         from vtap100.models.feedback import BeepConfig
         from vtap100.models.feedback import BeepSequence
 
-        config = BeepConfig(tag_beep=BeepSequence())
+        config = BeepConfig(tag_beep=BeepSequence(on_ms=100, off_ms=100, repeats=1))
         lines = config.to_config_lines()
         assert "TagBeep=100,100,1" in lines
 
@@ -643,7 +649,9 @@ class TestFeedbackConfigOutput:
         from vtap100.models.feedback import BeepSequence
         from vtap100.models.feedback import FeedbackConfig
 
-        config = FeedbackConfig(beep=BeepConfig(pass_beep=BeepSequence()))
+        config = FeedbackConfig(
+            beep=BeepConfig(pass_beep=BeepSequence(on_ms=100, off_ms=100, repeats=1))
+        )
         lines = config.to_config_lines()
         assert "PassBeep=100,100,1" in lines
 
@@ -659,9 +667,9 @@ class TestFeedbackConfigOutput:
         config = FeedbackConfig(
             led=LEDConfig(
                 mode=LEDMode.ON,
-                pass_led=LEDSequence(color="00FF00"),
+                pass_led=LEDSequence(color="00FF00", on_ms=100, off_ms=100, repeats=1),
             ),
-            beep=BeepConfig(pass_beep=BeepSequence()),
+            beep=BeepConfig(pass_beep=BeepSequence(on_ms=100, off_ms=100, repeats=1)),
         )
         lines = config.to_config_lines()
 

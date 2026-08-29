@@ -839,14 +839,14 @@ class ConfigParser:
             return None
 
         parts = value.split(",")
-        if len(parts) != 4:
+        if len(parts) < 2 or not parts[0]:
             return None
 
         return LEDSequence(
             color=parts[0].upper(),
             on_ms=int(parts[1]),
-            off_ms=int(parts[2]),
-            repeats=int(parts[3]),
+            off_ms=int(parts[2]) if len(parts) > 2 else None,
+            repeats=int(parts[3]) if len(parts) > 3 else None,
         )
 
     def _parse_beep_sequence(self, value: str | None) -> BeepSequence | None:
@@ -859,16 +859,14 @@ class ConfigParser:
             return None
 
         parts = value.split(",")
-        if len(parts) < 3:
+        if not parts or not parts[0]:
             return None
-
-        frequency = int(parts[3]) if len(parts) >= 4 else None
 
         return BeepSequence(
             on_ms=int(parts[0]),
-            off_ms=int(parts[1]),
-            repeats=int(parts[2]),
-            frequency=frequency,
+            off_ms=int(parts[1]) if len(parts) > 1 else None,
+            repeats=int(parts[2]) if len(parts) > 2 else None,
+            frequency=int(parts[3]) if len(parts) > 3 else None,
         )
 
 

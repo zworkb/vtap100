@@ -958,3 +958,33 @@ class TestKeyboardCompleteness:
 
         report = compare("!VTAPconfig\nKBLogMode=1\nKBPostfix=%0A\n")
         assert report.lost == []
+
+
+class TestFeedbackShortForms:
+    """The manufacturer documents omitting trailing sequence parameters."""
+
+    def test_single_value_beep_is_parsed(self) -> None:
+        """'TagBeep=100' is a single 100ms beep, not a parse failure."""
+        from vtap100.parser import parse
+
+        config = parse("!VTAPconfig\nTagBeep=100\n")
+        assert config.feedback.beep.tag_beep is not None
+        assert config.feedback.beep.tag_beep.on_ms == 100
+        assert config.feedback.beep.tag_beep.off_ms is None
+
+    def test_two_value_led_is_parsed(self) -> None:
+        """'TagLED=00FF00,200' is the manufacturer's own example form."""
+        from vtap100.parser import parse
+
+        config = parse("!VTAPconfig\nTagLED=00FF00,200\n")
+        assert config.feedback.led.tag_led is not None
+        assert config.feedback.led.tag_led.color == "00FF00"
+        assert config.feedback.led.tag_led.on_ms == 200
+
+    def test_short_forms_roundtrip_as_short_forms(self) -> None:
+        """A short form must not be expanded or dropped."""
+        from vtap100.roundtrip import compare
+
+        report = compare("!VTAPconfig\nTagBeep=100\nTagLED=00FF00,200\n")
+        assert report.lost == []
+        assert report.changed == []

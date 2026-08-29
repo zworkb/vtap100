@@ -1,0 +1,11 @@
+!VTAPconfig
+
+; The manufacturer documents omitting the interval and repeat count
+; "for a single beep of the specified duration". Its own TagLED example
+; is two-valued.
+LEDSelect=1
+LEDDefaultRGB=1EBBCF
+PassLED=00FF00,200,1,1
+TagLED=00FF00,200
+PassBeep=100,100,2
+TagBeep=100
