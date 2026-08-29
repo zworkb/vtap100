@@ -34,7 +34,7 @@ from vtap100.models.vas import AppleVASConfig
 
 vas = AppleVASConfig(
     merchant_id="pass.com.example.myapp",  # required, must start with "pass."
-    key_slot=1,                             # 0-6 (0=auto)
+    key_slot=1,                             # optional, 0-6 (0 or omitted = automatic)
     merchant_url="https://example.com",     # optional
 )
 ```
@@ -46,7 +46,7 @@ from vtap100.models.smarttap import GoogleSmartTapConfig
 
 st = GoogleSmartTapConfig(
     collector_id="96972794",  # required
-    key_slot=2,               # 0-6 (0=auto)
+    key_slot=2,               # optional, 0-6 (0 or omitted = default)
     key_version=1,            # must match Google dashboard
 )
 ```

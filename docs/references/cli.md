@@ -26,7 +26,7 @@ vtap100 generate [OPTIONS]
 |--------|-------|------|-------------|
 | `--apple-vas` | `-a` | TEXT | Apple VAS Merchant ID |
 | `--google-st` | `-g` | TEXT | Google Collector ID |
-| `--key-slot` | `-k` | 1-6 | Key slot |
+| `--key-slot` | `-k` | 0-6 | Key slot; 0 lets the reader select the key automatically |
 | `--key-version` | | INT | Google key version |
 | `--keyboard` | | flag | Enable keyboard emulation |
 | `--no-keyboard` | | flag | Disable keyboard emulation |

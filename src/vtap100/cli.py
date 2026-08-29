@@ -105,9 +105,9 @@ def main() -> None:
 @click.option(
     "--key-slot",
     "-k",
-    type=click.IntRange(1, 6),
+    type=click.IntRange(0, 6),
     default=1,
-    help="Key slot for the pass (1-6)",
+    help="Key slot for the pass (0-6; 0 lets the reader select automatically)",
 )
 @click.option(
     "--key-version",
@@ -251,7 +251,7 @@ def wizard() -> None:
             "Apple Pass Type ID (z.B. pass.com.example.myapp)",
             type=str,
         )
-        key_slot = click.prompt("Key-Slot (1-6)", type=int, default=1)
+        key_slot = click.prompt("Key slot (0-6, 0=automatic)", type=int, default=0)
 
         try:
             vas = AppleVASConfig(slot=1, merchant_id=merchant_id, key_slot=key_slot)
@@ -266,7 +266,7 @@ def wizard() -> None:
     print_section("Google Smart Tap")
     if click.confirm("Google Smart Tap konfigurieren?", default=False):
         collector_id = click.prompt("Google Collector ID", type=str)
-        key_slot = click.prompt("Key-Slot (1-6)", type=int, default=1)
+        key_slot = click.prompt("Key slot (0-6, 0=automatic)", type=int, default=0)
         key_version = click.prompt("Key-Version", type=int, default=1)
 
         try:
@@ -339,8 +339,8 @@ def wizard() -> None:
                 break
 
             try:
-                file_id = click.prompt("File ID (1-255, 0=keine)", type=int, default=0)
-                key_slot = click.prompt("Key-Slot (1-9, 0=keine)", type=int, default=0)
+                file_id = click.prompt("File ID (0-255, empty=skip)", type=int, default=0)
+                key_slot = click.prompt("Key slot (1-9, 0=none)", type=int, default=0)
 
                 crypto_choice = click.prompt(
                     "Crypto (0=Keine, 1=3DES, 3=AES)",
@@ -574,7 +574,7 @@ def docs() -> None:
     vas_table.add_column("Values")
     vas_table.add_column("Description")
     vas_table.add_row("VAS#MerchantID", "String", "Apple Pass Type ID (pass.com.*)")
-    vas_table.add_row("VAS#KeySlot", "0-6", "Private key slot (0=auto)")
+    vas_table.add_row("VAS#KeySlot", "0-6", "Private key slot, optional (0=auto)")
     vas_table.add_row("VAS#MerchantURL", "URL", "Optional URL for pass")
     console.print(vas_table)
 
@@ -585,7 +585,7 @@ def docs() -> None:
     st_table.add_column("Values")
     st_table.add_column("Description")
     st_table.add_row("ST#CollectorID", "String", "Google Collector ID")
-    st_table.add_row("ST#KeySlot", "0-6", "Private key slot (0=auto)")
+    st_table.add_row("ST#KeySlot", "0-6", "Private key slot, optional (0=default)")
     st_table.add_row("ST#KeyVersion", "Integer", "Key version number")
     console.print(st_table)
 
@@ -608,7 +608,7 @@ def docs() -> None:
     df_table.add_column("Values")
     df_table.add_column("Description")
     df_table.add_row("DESFire#AppID", "Hex (6)", "Application ID")
-    df_table.add_row("DESFire#FileID", "1-255", "File ID to read")
+    df_table.add_row("DESFire#FileID", "0-255", "File ID to read")
     df_table.add_row("DESFire#KeySlot", "1-9", "Key slot for auth")
     df_table.add_row("DESFire#Crypto", "0,1,3", "Crypto mode (0=None, 1=3DES, 3=AES)")
     console.print(df_table)

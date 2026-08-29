@@ -23,13 +23,13 @@ ST2CollectorID=96972794
 
 ### ST#KeySlot
 
-The slot (1-6) where the private key is stored.
+The slot (1-6) where the private key is stored. Optional.
 
 ```ini
 ST2KeySlot=1
 ```
 
-The value 0 means automatic selection.
+The value 0, or omitting the setting entirely, is the documented default.
 
 ### ST#KeyVersion
 

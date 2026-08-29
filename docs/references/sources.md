@@ -20,11 +20,14 @@ Online documentation with detailed parameter descriptions:
 - [NFC Card/Tag Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-Card-Tag-settings.htm) - NFC tag types
 - [MIFARE Classic Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-MIFARE-settings.htm) - MIFARE Classic cards
 - [DESFire Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-DESFire-settings.htm) - MIFARE DESFire
+- [Access Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-Access-settings.htm) - Apple Access (ECP2): AccessTCI, AccessAuthRequired, ECP2Mode
+- [Control the LEDs or buzzer](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/Control-the-LEDs-or-buzzer.htm) - Beep sequences and their short forms
 - [LED Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-LED-settings.htm) - LED control
 - [Bluetooth Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-BT-settings.htm) - Bluetooth BLE
 
 ### Configuration Files
 - [Default config.txt](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/VTAPConfig-txt.htm) - Default configuration
+- [Downloadable sample config.txt](https://www.vtapnfc.com/downloads/config.txt) - The manufacturer's published example, kept verbatim as `tests/fixtures/valid_configs/vendor_sample.txt`
 - [Default leds.ini](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/LEDS-ini.htm) - LED sequences
 - [Dynamic Configuration Commands](https://help.vtapnfc.com/en/Content/VTAP-Commands/Dynamic-config-commands.htm) - Dynamic commands
 - [Control LED and Buzzer Feedback](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/Control-the-LEDs-or-buzzer.htm) - LED/Buzzer control
@@ -84,4 +87,9 @@ PDF manuals for online reading or download:
 
 ---
 
-*Last updated: 2025-12-01*
+These pages are the authority for every documented value range in this project.
+Where the repository's own documentation disagreed with them, the manufacturer
+won — see `docs/superpowers/specs/2026-08-28-config-roundtrip-design.md` section 9
+for the quoted ranges.
+
+*Last updated: 2026-08-29*

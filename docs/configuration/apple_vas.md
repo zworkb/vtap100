@@ -13,7 +13,7 @@ Apple VAS (Value Added Services) enables reading Apple Wallet passes via NFC. Th
 | Parameter | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | VAS#MerchantID | String | - | **Required.** Apple Pass Type ID (e.g., `pass.com.company.passname`) |
-| VAS#KeySlot | 0-6 | 0 | Slot of the private#.pem file (0=auto) |
+| VAS#KeySlot | 0-6 | omitted | Slot of the private#.pem file. Optional: 0 or omitted makes the reader compare all available keys against the hash of the public key |
 | VAS#MerchantURL | URL | - | Optional: URL for pass presentation |
 | VASDefaultPassesEnabled | List | 1,2,3,4,5,6 | Active VAS configurations |
 

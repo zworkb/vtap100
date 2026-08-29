@@ -90,6 +90,10 @@ Detailed documentation can be found in the [docs/](https://github.com/jensens/vt
 - [Reference Sources](https://github.com/jensens/vtap100/blob/main/docs/references/sources.md)
 - [Troubleshooting](https://github.com/jensens/vtap100/blob/main/docs/troubleshooting.md)
 
+## Changelog
+
+See [CHANGELOG.md](https://github.com/jensens/vtap100/blob/main/CHANGELOG.md).
+
 ## Development
 
 See [docs/development.md](https://github.com/jensens/vtap100/blob/main/docs/development.md) for the full development guide (TDD, testing, TUI architecture).

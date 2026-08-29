@@ -7,7 +7,7 @@ Quick reference for all VTAP100 config.txt parameters. For detailed usage, see t
 | Parameter | Type | Range | Default | Description |
 |-----------|------|-------|---------|-------------|
 | `VAS#MerchantID` | string | must start with `pass.` | required | Apple Pass Type ID |
-| `VAS#KeySlot` | int | 0-6 | 0 (auto) | Private key slot |
+| `VAS#KeySlot` | int | 0-6 | omitted | Private key slot; 0 or omitted selects the key automatically |
 | `VAS#MerchantURL` | string | URL | - | Optional URL on pass presentation |
 | `VASDefaultPassesEnabled` | string | 1-6 | 1,2,3,4,5,6 | Enabled pass slots |
 
@@ -18,7 +18,7 @@ Quick reference for all VTAP100 config.txt parameters. For detailed usage, see t
 | Parameter | Type | Range | Default | Description |
 |-----------|------|-------|---------|-------------|
 | `ST#CollectorID` | string | numeric | required | Google Collector ID |
-| `ST#KeySlot` | int | 0-6 | 0 (auto) | Private key slot |
+| `ST#KeySlot` | int | 0-6 | omitted | Private key slot; 0 or omitted is the documented default |
 | `ST#KeyVersion` | int | 0-65535 | 0 | Key version (must match Google) |
 | `STDefaultPassesEnabled` | string | 1-6 | 1,2,3,4,5,6 | Enabled pass slots |
 
@@ -33,7 +33,7 @@ Quick reference for all VTAP100 config.txt parameters. For detailed usage, see t
 | `KBSource` | string | see below | A5 | Data sources to output |
 | `KBPrefix` | string | ASCII-hex | - | Prefix before data |
 | `KBPostfix` | string | ASCII-hex | %0A | Suffix after data (newline) |
-| `KBDelayMS` | int | 5-255 | 5 | Keystroke delay in ms |
+| `KBDelayMS` | int | 5-255 | 5 | Keystroke delay in ms. Parsing accepts 0-255: the manufacturer's own sample file uses 2 |
 | `KBPassMode` | bool | 0/1 | 0 | Enable payload extraction |
 | `KBPassSection` | int | 0-255 | 0 | Section to extract |
 | `KBPassSeparator` | char | any | \| | Section separator |
@@ -93,19 +93,47 @@ Common values: `A5` (default), `81`, `80`, `01`
 | Parameter | Type | Range | Default | Description |
 |-----------|------|-------|---------|-------------|
 | `DESFire#AppID` | string | 6 hex | required | Application ID |
-| `DESFire#FileID` | int | 1-255 | - | File ID |
-| `DESFire#KeyNum` | int | 0-255 | - | Key number |
+| `DESFire#FileID` | int | 0-255 | - | File ID. File 0 is legal and common |
+| `DESFire#KeyNum` | int | 0-15 | - | Key number |
 | `DESFire#KeySlot` | int | 1-9 | - | Key slot |
 | `DESFire#Crypto` | enum | 0,1,3 | - | 0=none, 1=3DES, 3=AES |
 | `DESFire#Format` | enum | 0,1,2 | - | 0=raw, 1=KEY-ID v1, 2=v2 |
 | `DESFire#ReadLength` | int | 1-255 | 3 | Bytes to read |
 | `DESFire#ReadOffset` | int | 0-255 | 0 | Start offset |
-| `DESFire#Diversification` | bool | 0/1 | - | Key diversification |
-| `DESFire#PrivacyKeyNum` | int | 0-255 | - | Privacy key number |
+| `DESFire#Diversification` | int | 0,1,3,5,7 | - | Key diversification bit field, see below |
+| `DESFire#PrivacyKeyNum` | int | 0-15 | - | Privacy key number |
 | `DESFire#PrivacyKeySlot` | int | 1-9 | - | Privacy key slot |
-| `DESFire#SysIDKeySlot` | int | 1-9 | - | System ID key slot |
+| `DESFire#SysIDKeySlot` | int | 0-9 | - | System ID key slot; 0 means no System Identifier |
 | `DESFire#SysIDLength` | int | 0-16 | - | System ID length |
 | `DESFireSeparator` | char | any | , | Multi-app separator |
+
+### DESFire#Diversification Bit Field
+
+`DESFire#Diversification` is a bit field, not an on/off switch:
+
+| Bit | Value | Meaning |
+|-----|-------|---------|
+| 0 | 1 | AN10922 key diversification active |
+| 1 | 2 | Omit the AID from the diversification input |
+| 2 | 4 | Reverse UID byte order |
+
+Only five combinations are meaningful, because bits 1 and 2 modify a feature
+that bit 0 enables:
+
+| Value | Behaviour |
+|-------|-----------|
+| `0` | No diversification |
+| `1` | AN10922 over UID and AID (standard) |
+| `3` | AN10922 over UID, without the AID |
+| `5` | AN10922 with reversed UID byte order, AID included |
+| `7` | AN10922 with reversed UID byte order, without the AID |
+
+Values 2, 4 and 6 are rejected: they set a modifier without enabling
+diversification.
+
+The mode must match the provisioning system exactly. A wrong mode does not fail
+loudly — the reader computes a different diversified key and authentication
+simply stops working.
 
 *# = slot number 1-9*
 
@@ -154,3 +182,26 @@ Parameter=Value
 - Header `!VTAPconfig` required
 - Comments start with `;`
 - Parameters: `Name=Value`
+
+## Apple Access (ECP2)
+
+Setting `AccessTCI` puts the reader into ECP2 mode and enables DESFire
+credential reading. It does **not** disable Apple VAS: a single reader can serve
+Apple VAS, Google Smart Tap and Apple Access from one configuration file.
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `AccessTCI` | string | hex, whole bytes | - | Terminal Configuration Identifier assigned by Apple, conventionally 3 bytes |
+| `AccessAuthRequired` | bool | 0/1 | 0 | Require device authentication on every tap |
+| `ECP2Mode` | enum | t, a | a | `t` = Apple Transit, `a` = Apple Access |
+
+## Serial Port
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `ComPortEnable` | bool | 0/1 | - | Enable serial port output |
+| `ComPortMode` | int | 0+ | - | Serial output mode |
+| `ComPortSource` | string | hex bitmask | - | Data sources for serial output |
+
+`ComPortSource` uses the same bitmask as `KBSource`; see the KBSource section
+above for the bit meanings.

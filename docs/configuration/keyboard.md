@@ -89,6 +89,11 @@ KBPostfix=%09        ; Tab
 
 ### KBDelayMS
 
+> The manufacturer documents 5-255 ms, but ships a sample `config.txt` using
+> `KBDelayMS=2`. This tool therefore accepts 0-255 when reading a file, so such
+> configurations load unchanged, while the editor constrains new input to the
+> documented range.
+
 Delay between keystrokes in milliseconds (5-255).
 
 ```ini

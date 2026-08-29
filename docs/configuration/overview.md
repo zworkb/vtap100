@@ -54,7 +54,7 @@ KBSource=81
 | Parameter | Description | Values |
 |-----------|-------------|--------|
 | VAS#MerchantID | Apple Pass Type ID | `pass.com.*` |
-| VAS#KeySlot | Private key slot | 0-6 (0=auto) |
+| VAS#KeySlot | Private key slot | 0-6, optional (0 or omitted = automatic) |
 | VAS#MerchantURL | Optional URL | URL string |
 
 Up to 6 VAS configurations possible (VAS1 to VAS6).
@@ -64,7 +64,7 @@ Up to 6 VAS configurations possible (VAS1 to VAS6).
 | Parameter | Description | Values |
 |-----------|-------------|--------|
 | ST#CollectorID | Google Collector ID | String |
-| ST#KeySlot | Private key slot | 0-6 (0=auto) |
+| ST#KeySlot | Private key slot | 0-6, optional (0 or omitted = default) |
 | ST#KeyVersion | Key version | Integer |
 
 Up to 6 Smart Tap configurations possible (ST1 to ST6).

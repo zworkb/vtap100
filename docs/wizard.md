@@ -36,7 +36,7 @@ Press `Enter` for defaults, `Ctrl+C` to cancel.
 
 - Configure DESFire? (y/n)
 - App ID (6 hex chars)
-- File ID (1-255)
+- File ID (0-255)
 - Key slot (1-9)
 - Crypto mode (0=none, 1=3DES, 3=AES)
 

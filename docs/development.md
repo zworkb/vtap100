@@ -29,6 +29,44 @@ uv run pytest tests/unit/test_models_vas.py -v
 2. **Green**: Minimal implementation to pass
 3. **Refactor**: Improve code, tests stay green
 
+## Configuration Fixture Corpus
+
+`tests/fixtures/` holds real configuration files that must survive a load/save
+cycle unchanged. The battery in `tests/integration/test_fixture_configs.py` is
+parametrised by glob, so **adding a configuration needs no test code**:
+
+```
+tests/fixtures/
+├── valid_configs/     # must parse and round-trip losslessly
+├── invalid_configs/   # must fail with a named field error
+├── expected_outputs/  # canonical generator output
+└── local_configs/     # git-ignored, your own un-anonymised files
+```
+
+Drop a file into `valid_configs/` and it is immediately subjected to four
+checks: it parses, a cycle loses nothing, a second cycle changes nothing, and
+the model compares equal afterwards.
+
+### Contributing a configuration
+
+Fixtures are public. Never commit real deployment identifiers or key material —
+a leaked identifier stays in the git history after the file is corrected. A
+pre-commit hook enforces this with an allowlist, so only placeholder values pass:
+
+```bash
+uv run pre-commit run fixture-leak-check --all-files
+```
+
+If you need a new placeholder value, extend the allowlist in
+`scripts/check_fixture_leaks.py` deliberately — that edit is the moment to check
+whether the value is genuinely an example.
+
+### Testing against your own configurations
+
+`tests/fixtures/local_configs/` is git-ignored. Files placed there are run
+through the same battery and never leave your machine, which is the quickest way
+to find out whether the tool handles a reader configuration you actually own.
+
 ## Code Quality
 
 ```bash

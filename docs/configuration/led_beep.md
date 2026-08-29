@@ -54,14 +54,23 @@ LEDDefaultRGB=FF0000    ; Red
 
 LED sequences can be defined for pass read, tag read, error, and start events.
 
-**Format:** `RRGGBB,on_ms,off_ms,repeats`
+**Format:** `RRGGBB,on_ms[,off_ms[,repeats]]`
 
 | Parameter | Range | Description |
 |-----------|-------|-------------|
 | RRGGBB | Hex | Color (6 characters) |
 | on_ms | 0-65535 | On time in ms |
-| off_ms | 0-65535 | Off time in ms |
-| repeats | 1-255 | Repetitions |
+| off_ms | 0-65535 | Off time in ms. May be omitted |
+| repeats | 1-255 | Repetitions. May be omitted |
+
+Trailing parameters may be left out for a single flash of the given duration.
+The manufacturer's own example uses the short form:
+
+```ini
+TagLED=00FF00,500
+```
+
+A short form is written back as a short form; the tool does not expand it.
 
 ```ini
 ; Green blink on pass read (2x, 100ms on/off)
@@ -81,14 +90,23 @@ StartLED=FFFF00,500,0,1
 
 Beep sequences can be defined for pass read, tag read, error, and start events.
 
-**Format:** `on_ms,off_ms,repeats[,frequency]`
+**Format:** `on_ms[,off_ms[,repeats[,frequency]]]`
 
 | Parameter | Range | Description |
 |-----------|-------|-------------|
 | on_ms | 0-65535 | On time in ms |
-| off_ms | 0-65535 | Off time in ms |
-| repeats | 1-255 | Repetitions |
-| frequency | 100-20000 | Frequency in Hz (optional, default: 3136) |
+| off_ms | 0-65535 | Off time in ms. May be omitted |
+| repeats | 1-255 | Repetitions. May be omitted |
+| frequency | 100-20000 | Frequency in Hz. May be omitted (reader default 3136) |
+
+The manufacturer documents omitting "the interval between beeps and number of
+repeats, for a single beep of the specified duration":
+
+```ini
+TagBeep=100
+```
+
+A short form is written back as a short form.
 
 ```ini
 ; 2 beeps on pass read

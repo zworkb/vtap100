@@ -39,7 +39,7 @@ DESFire App IDs must be exactly 6 hexadecimal characters.
 
 **Fix:** Use format like `112233` or `AABBCC`
 
-### "Key slot must be 1-6" / "Key slot must be 1-9"
+### "Key slot must be 0-6" / "Key slot must be 1-9"
 
 - Apple VAS / Google Smart Tap: slots 1-6
 - DESFire / Tag Read: slots 1-9
@@ -51,6 +51,23 @@ DESFire App IDs must be exactly 6 hexadecimal characters.
 - Spaces around `=` sign (use `Name=Value`, not `Name = Value`)
 - Invalid characters in values
 - Wrong line endings (use LF, not CRLF)
+
+## Settings Disappear After Saving
+
+If a setting vanishes from your `config.txt` after loading and saving it, that
+is a defect — report it with the file. As of the round-trip work, all known real
+configurations survive a cycle unchanged, including the manufacturer's own
+published sample.
+
+### Known limitations
+
+Two documented syntaxes are not yet supported. A configuration using them loads,
+but the affected line is dropped on save:
+
+- **Sequence references** (firmware v5+): `TagBeep=100:tagbeep@beeps.ini` and
+  `LEDDefaultRGB=FFFFFF:seq.comet@leds.ini`, which point at entries in
+  `leds.ini` or `beeps.ini`.
+- **Bluetooth, OSDP and MIFARE Classic settings** are not modelled at all.
 
 ## Key File Issues
 
