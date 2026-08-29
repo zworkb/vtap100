@@ -1,0 +1,5 @@
+!VTAPconfig
+
+; The manufacturer documents KeySlot as optional: with no slot given,
+; all available keys are compared against the hash of the public key.
+VAS1MerchantID=pass.com.example.autokey

@@ -45,7 +45,7 @@ class _VASParseData:
     """Temporary data structure for parsing VAS configs."""
 
     merchant_id: str | None = None
-    key_slot: int = 0
+    key_slot: int | None = None
     merchant_url: str | None = None
 
 
@@ -54,8 +54,8 @@ class _SmartTapParseData:
     """Temporary data structure for parsing Smart Tap configs."""
 
     collector_id: str | None = None
-    key_slot: int = 0
-    key_version: int = 0
+    key_slot: int | None = None
+    key_version: int | None = None
 
 
 @dataclass
