@@ -17,7 +17,12 @@ Sprache:
 - die Doku ist english
 - Prompts und Pläne können gerne Deutsch sein.
 
-Pläne:
-- vor dem Implementieren unter ./docs ablegen, immer PLAN_[THEMA].md
+Pläne und Specs:
+- vor dem Implementieren ablegen, beide unter ./docs/superpowers/
+- Specs: docs/superpowers/specs/YYYY-MM-DD-[thema]-design.md
+- Pläne: docs/superpowers/plans/YYYY-MM-DD-[thema].md
+- beide bleiben als Archiv liegen, auch wenn erfüllt. Das Datum im Namen hält
+  sie auseinander, Löschen ist deshalb nicht nötig. Sie belegen, warum etwas so
+  gebaut wurde — das steht sonst nirgends.
 
 Dokumentation ist auch unter ./docs abzulegen. Ausgenommen davon sind Hilfetexte fùr das Programm.
