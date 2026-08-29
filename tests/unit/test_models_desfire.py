@@ -68,8 +68,11 @@ class TestDESFireAppConfig:
         assert config.key_slot is None
         assert config.crypto is None
         assert config.format is None
-        assert config.read_length == 3
-        assert config.read_offset == 0
+        # Absent, not defaulted: the reader's own defaults are 3 and 0, but
+        # keeping the model value None is what lets an explicit
+        # DESFire1ReadOffset=0 survive a round-trip.
+        assert config.read_length is None
+        assert config.read_offset is None
 
     def test_desfire_app_id_required(self) -> None:
         """App ID is required."""
@@ -571,3 +574,21 @@ class TestDESFireRemainingRanges:
         from vtap100.models.desfire import DESFireAppConfig
 
         assert DESFireAppConfig(app_id="AABBCC", sysid_key_slot=0).sysid_key_slot == 0
+
+
+class TestDESFireReadDefaults:
+    """An explicitly set default value must keep its line."""
+
+    def test_explicit_read_offset_zero_is_preserved(self) -> None:
+        """ReadOffset=0 is also the default, and must not vanish."""
+        from vtap100.roundtrip import compare
+
+        report = compare("!VTAPconfig\nDESFire1AppID=AABBCC\nDESFire1ReadOffset=0\n")
+        assert report.lost == []
+
+    def test_explicit_read_length_three_is_preserved(self) -> None:
+        """ReadLength=3 is also the default."""
+        from vtap100.roundtrip import compare
+
+        report = compare("!VTAPconfig\nDESFire1AppID=AABBCC\nDESFire1ReadLength=3\n")
+        assert report.lost == []

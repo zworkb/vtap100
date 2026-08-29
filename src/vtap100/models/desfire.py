@@ -101,8 +101,12 @@ class DESFireAppConfig(BaseModel):
     key_slot: int | None = Field(default=None, ge=1, le=9, description="Key slot (1-9)")
     crypto: DESFireCryptoMode | None = Field(default=None, description="Crypto mode")
     format: DESFireDataFormat | None = Field(default=None, description="Data format")
-    read_length: int = Field(default=3, ge=1, le=255, description="Read length (1-255)")
-    read_offset: int = Field(default=0, ge=0, le=255, description="Read offset (0-255)")
+    read_length: int | None = Field(
+        default=None, ge=1, le=255, description="Read length (1-255, reader default 3)"
+    )
+    read_offset: int | None = Field(
+        default=None, ge=0, le=255, description="Read offset (0-255, reader default 0)"
+    )
     diversification: int | None = Field(
         default=None,
         ge=0,
@@ -192,10 +196,10 @@ class DESFireAppConfig(BaseModel):
             lines.append(f"{prefix}Format={self.format.value}")
 
         # Read settings - only include if not default
-        if self.read_length != 3:
+        if self.read_length is not None:
             lines.append(f"{prefix}ReadLength={self.read_length}")
 
-        if self.read_offset != 0:
+        if self.read_offset is not None:
             lines.append(f"{prefix}ReadOffset={self.read_offset}")
 
         if self.diversification is not None:

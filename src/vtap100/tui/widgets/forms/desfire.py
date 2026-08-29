@@ -185,7 +185,7 @@ class DESFireConfigForm(BaseConfigForm):
         with Horizontal(classes="form-row"):
             yield Label(t("forms.desfire.read_length"))
             yield Input(
-                value=str(self._config.read_length),
+                value="" if self._config.read_length is None else str(self._config.read_length),
                 placeholder=t("forms.desfire.read_length_placeholder"),
                 id="read_length",
             )
@@ -194,7 +194,7 @@ class DESFireConfigForm(BaseConfigForm):
         with Horizontal(classes="form-row"):
             yield Label(t("forms.desfire.read_offset"))
             yield Input(
-                value=str(self._config.read_offset),
+                value="" if self._config.read_offset is None else str(self._config.read_offset),
                 placeholder=t("forms.desfire.read_offset_placeholder"),
                 id="read_offset",
             )
@@ -261,10 +261,10 @@ class DESFireConfigForm(BaseConfigForm):
         data_format = format_select.value
 
         read_length_str = self.query_one("#read_length", Input).value.strip()
-        read_length = int(read_length_str) if read_length_str else 3
+        read_length = int(read_length_str) if read_length_str else None
 
         read_offset_str = self.query_one("#read_offset", Input).value.strip()
-        read_offset = int(read_offset_str) if read_offset_str else 0
+        read_offset = int(read_offset_str) if read_offset_str else None
 
         builder = DiversificationBuilder()
         if self.query_one("#div_active", Checkbox).value:
