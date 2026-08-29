@@ -153,9 +153,13 @@ Out of scope, documented as known limitations in `docs/troubleshooting.md`:
 
 ## 5. Design
 
-The class model below shows every type this work touches. `<<new>>` marks a class
-this spec adds; `<<changed>>` marks one whose fields or types change. Everything
-unmarked stays as it is and appears only to show where the changes sit.
+The class model below shows the **target state**, not today's code.
+
+- 🟩 **Green** — a class this spec adds (`<<new>>`). Does not exist today.
+- 🟨 **Amber** — a class whose fields or types change (`<<changed>>`). Members are
+  shown as they will be, with a trailing note giving what they are today.
+- ⬜ **Uncoloured** — identical before and after; shown only so the changes have
+  context.
 
 ### Configuration aggregate
 
@@ -178,35 +182,35 @@ classDiagram
 
     class AppleVASConfig {
         <<changed>>
-        +int slot
+        +int slot  NEW
         +str merchant_id
-        +int? key_slot
+        +int? key_slot  today int required
         +str? merchant_url
         +to_config_lines(slot) list~str~
     }
 
     class GoogleSmartTapConfig {
         <<changed>>
-        +int slot
+        +int slot  NEW
         +str collector_id
-        +int? key_slot
-        +int? key_version
+        +int? key_slot  today int required
+        +int? key_version  today int required
         +to_config_lines(slot) list~str~
     }
 
     class KeyboardConfig {
         <<changed>>
         +bool log_mode
-        +bool? enable
+        +bool? enable  today never parsed
         +str source
-        +str? prefix
-        +str? postfix
-        +int? delay_ms
-        +bool? pass_mode
-        +int? pass_section
-        +str? pass_separator
-        +int? pass_start
-        +int? pass_length
+        +str? prefix  today never parsed
+        +str? postfix  today str default 0A
+        +int? delay_ms  today int default 5
+        +bool? pass_mode  today bool default false
+        +int? pass_section  today int default 0
+        +str? pass_separator  today str default pipe
+        +int? pass_start  today int default 0
+        +int? pass_length  today int default 0
     }
 
     class AccessConfig {
@@ -241,6 +245,12 @@ classDiagram
 
     DefaultPassesEnabled <|-- VASDefaultPassesEnabled
     DefaultPassesEnabled <|-- STDefaultPassesEnabled
+
+    style AccessConfig fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style ComPortConfig fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style AppleVASConfig fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
+    style GoogleSmartTapConfig fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
+    style KeyboardConfig fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
 ```
 
 `slot` is what makes `VAS2` stay `VAS2`. Without it the number lives only in the
@@ -260,17 +270,17 @@ classDiagram
     class DESFireAppConfig {
         <<changed>>
         +str app_id
-        +int? file_id
-        +int? key_num
+        +int? file_id  today ge 1, must be ge 0
+        +int? key_num  today unchecked, must be 0..15
         +int? key_slot
         +DESFireCryptoMode? crypto
         +DESFireDataFormat? format
-        +int? read_length
-        +int? read_offset
-        +int? diversification
+        +int? read_length  today int default 3
+        +int? read_offset  today int default 0
+        +int? diversification  today bool
         +int? privacy_key_num
-        +int? privacy_key_slot
-        +int? sysid_key_slot
+        +int? privacy_key_slot  today unchecked, must be 1..9
+        +int? sysid_key_slot  today unchecked, must be 0..9
         +int? sysid_length
     }
 
@@ -331,15 +341,15 @@ classDiagram
         <<changed>>
         +str color
         +int on_ms
-        +int? off_ms
-        +int? repeats
+        +int? off_ms  today int default 100
+        +int? repeats  today int default 1
     }
 
     class BeepSequence {
         <<changed>>
         +int on_ms
-        +int? off_ms
-        +int? repeats
+        +int? off_ms  today int default 100
+        +int? repeats  today int default 1
         +int? frequency
     }
 
@@ -359,6 +369,13 @@ classDiagram
     LEDConfig ..> LEDMode
     LEDConfig ..> LEDSelect
     BeepConfig o-- "0..4" BeepSequence
+
+    style DiversificationBuilder fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style ComPortConfig fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style DESFireAppConfig fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
+    style LEDSequence fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
+    style BeepSequence fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
+    style KeyboardConfig fill:#fdf0d5,stroke:#c8860d,stroke-width:2px,color:#4a3106
 ```
 
 `off_ms` and `repeats` becoming optional is what lets `TagBeep=100` survive as
@@ -429,6 +446,11 @@ classDiagram
     VTAPEditorApp ..> ConfigParser
     VTAPEditorApp ..> ConfigGenerator
     TestFixtureConfigs ..> RoundTrip
+
+    style RoundTrip fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style RoundTripReport fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style Anonymizer fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
+    style TestFixtureConfigs fill:#dcf5e4,stroke:#218c53,stroke-width:2px,color:#0b3d22
 ```
 
 `RoundTrip` is imported by both the CLI and the test battery. A second
