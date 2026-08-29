@@ -98,12 +98,16 @@ class TestDESFireAppConfig:
         config = DESFireAppConfig(app_id="AABBCC", file_id=255)
         assert config.file_id == 255
 
-    def test_desfire_file_id_zero_invalid(self) -> None:
-        """File ID 0 should fail."""
+    def test_desfire_file_id_negative_invalid(self) -> None:
+        """File ID below 0 should fail.
+
+        File 0 itself is valid: the manufacturer documents "Use a value from 0
+        to 255", and real deployment configs read from file 0.
+        """
         from vtap100.models.desfire import DESFireAppConfig
 
         with pytest.raises(ValidationError):
-            DESFireAppConfig(app_id="AABBCC", file_id=0)
+            DESFireAppConfig(app_id="AABBCC", file_id=-1)
 
     def test_desfire_file_id_above_max_invalid(self) -> None:
         """File ID above 255 should fail."""
@@ -466,3 +470,27 @@ class TestDESFireConfigOutput:
         lines = config.to_config_lines()
 
         assert not any("DESFireSeparator" in line for line in lines)
+
+
+class TestDESFireFileIdRange:
+    """FileID range per the manufacturer: 'Use a value from 0 to 255'."""
+
+    def test_file_id_zero_is_valid(self) -> None:
+        """File 0 is a legal DESFire file number and appears in real configs."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        config = DESFireAppConfig(app_id="AABBCC", file_id=0)
+        assert config.file_id == 0
+
+    def test_file_id_255_is_valid(self) -> None:
+        """Upper bound is inclusive."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        assert DESFireAppConfig(app_id="AABBCC", file_id=255).file_id == 255
+
+    def test_file_id_256_is_rejected(self) -> None:
+        """Above the documented range is still an error."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        with pytest.raises(ValidationError):
+            DESFireAppConfig(app_id="AABBCC", file_id=256)

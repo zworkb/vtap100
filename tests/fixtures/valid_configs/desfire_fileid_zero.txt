@@ -1,0 +1,10 @@
+!VTAPconfig
+
+; DESFire read from file 0 — the form used by real deployments.
+NFCType4=D
+
+DESFire1AppID=AABBCC
+DESFire1FileID=0
+DESFire1Crypto=3
+DESFire1KeyNum=2
+DESFire1KeySlot=2

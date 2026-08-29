@@ -33,7 +33,7 @@ class DESFireAppConfig(BaseModel):
 
     Attributes:
         app_id: Application ID (6 hex characters).
-        file_id: File ID to read (1-255).
+        file_id: File ID to read (0-255).
         key_num: Key number for authentication.
         key_slot: Key slot for authentication (1-9).
         crypto: Cryptographic mode.
@@ -48,7 +48,7 @@ class DESFireAppConfig(BaseModel):
     """
 
     app_id: str = Field(..., description="Application ID (6 hex characters)")
-    file_id: int | None = Field(default=None, ge=1, le=255, description="File ID (1-255)")
+    file_id: int | None = Field(default=None, ge=0, le=255, description="File ID (0-255)")
     key_num: int | None = Field(default=None, description="Key number")
     key_slot: int | None = Field(default=None, ge=1, le=9, description="Key slot (1-9)")
     crypto: DESFireCryptoMode | None = Field(default=None, description="Crypto mode")
