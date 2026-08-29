@@ -1,0 +1,9 @@
+!VTAPconfig
+
+; Diversification bit field: bit 0 active, bit 1 omit AID, bit 2 reverse UID.
+; Mode 5 means AN10922 with reversed UID byte order and the AID included.
+NFCType4=D
+
+DESFire1AppID=AABBCC
+DESFire1FileID=0
+DESFire1Diversification=5

@@ -535,7 +535,7 @@ DESFire1Diversification=1
 """
         config = parse(content)
         assert config.desfire is not None
-        assert config.desfire.apps[0].diversification is True
+        assert config.desfire.apps[0].diversification == 1
 
     def test_parse_desfire_privacy_settings(self) -> None:
         """Parse DESFire privacy key settings."""
@@ -898,3 +898,17 @@ class TestSlotPreservation:
 
         out = ConfigGenerator(parse("!VTAPconfig\nST1CollectorID=80644855\n")).generate()
         assert "ST1CollectorID=80644855" in out
+
+
+class TestDiversificationRoundTrip:
+    """Every diversification mode must survive a cycle."""
+
+    @pytest.mark.parametrize("value", [1, 3, 5, 7])
+    def test_mode_is_preserved(self, value: int) -> None:
+        """Modes 3, 5 and 7 were silently coerced to False and dropped."""
+        from vtap100.generator import ConfigGenerator
+        from vtap100.parser import parse
+
+        text = f"!VTAPconfig\nDESFire1AppID=AABBCC\nDESFire1Diversification={value}\n"
+        out = ConfigGenerator(parse(text)).generate()
+        assert f"DESFire1Diversification={value}" in out

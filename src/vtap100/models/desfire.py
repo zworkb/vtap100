@@ -28,6 +28,54 @@ class DESFireDataFormat(IntEnum):
     KEYID_V2 = 2  # KEY-ID v2 format
 
 
+class DiversificationBuilder:
+    """Builder for DESFire#Diversification bit field values.
+
+    Mirrors KBSourceBuilder, the other bitmask setting in this codebase.
+
+    - Bit 0 (0b001): AN10922 key diversification active
+    - Bit 1 (0b010): omit the AID from the diversification input
+    - Bit 2 (0b100): reverse UID byte order
+
+    Choosing the wrong mode does not fail loudly: the reader computes a
+    different diversified key and authentication simply stops working.
+
+    Reference:
+        https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-DESFire-settings.htm
+
+    Example:
+        >>> DiversificationBuilder().active().reverse_uid().build()
+        5
+    """
+
+    ACTIVE = 0b001
+    OMIT_AID = 0b010
+    REVERSE_UID = 0b100
+
+    def __init__(self) -> None:
+        """Initialise an empty builder with value 0."""
+        self._value: int = 0
+
+    def active(self) -> "DiversificationBuilder":
+        """Enable AN10922 key diversification."""
+        self._value |= self.ACTIVE
+        return self
+
+    def omit_aid(self) -> "DiversificationBuilder":
+        """Omit the AID from the diversification input."""
+        self._value |= self.OMIT_AID
+        return self
+
+    def reverse_uid(self) -> "DiversificationBuilder":
+        """Reverse UID byte order."""
+        self._value |= self.REVERSE_UID
+        return self
+
+    def build(self) -> int:
+        """Return the composed bit field value."""
+        return self._value
+
+
 class DESFireAppConfig(BaseModel):
     """Configuration for a single DESFire application.
 
@@ -40,7 +88,7 @@ class DESFireAppConfig(BaseModel):
         format: Data output format.
         read_length: Number of bytes to read (1-255, default 3).
         read_offset: Offset in file to start reading (0-255, default 0).
-        diversification: Enable key diversification.
+        diversification: Key diversification bit field (0, 1, 3, 5 or 7).
         privacy_key_num: Privacy key number.
         privacy_key_slot: Privacy key slot.
         sysid_key_slot: System ID key slot.
@@ -55,13 +103,41 @@ class DESFireAppConfig(BaseModel):
     format: DESFireDataFormat | None = Field(default=None, description="Data format")
     read_length: int = Field(default=3, ge=1, le=255, description="Read length (1-255)")
     read_offset: int = Field(default=0, ge=0, le=255, description="Read offset (0-255)")
-    diversification: bool | None = Field(default=None, description="Enable key diversification")
+    diversification: int | None = Field(
+        default=None,
+        ge=0,
+        le=7,
+        description="Key diversification bit field (0, 1, 3, 5 or 7)",
+    )
     privacy_key_num: int | None = Field(default=None, description="Privacy key number")
     privacy_key_slot: int | None = Field(default=None, description="Privacy key slot")
     sysid_key_slot: int | None = Field(default=None, description="System ID key slot")
     sysid_length: int | None = Field(
         default=None, ge=0, le=16, description="System ID length (0-16)"
     )
+
+    @field_validator("diversification")
+    @classmethod
+    def validate_diversification(cls, v: int | None) -> int | None:
+        """Reject modifier bits without the active bit.
+
+        Bit 1 (omit AID) and bit 2 (reverse UID) modify how the AN10922 input is
+        built. Setting either without bit 0 describes modifiers on a disabled
+        feature, which the reader cannot act on.
+
+        Args:
+            v: The raw diversification value.
+
+        Returns:
+            The validated value.
+
+        Raises:
+            ValueError: If a modifier bit is set without bit 0.
+        """
+        if v is not None and v != 0 and not v & DiversificationBuilder.ACTIVE:
+            msg = "diversification must be 0, or have bit 0 set (valid: 0, 1, 3, 5, 7)"
+            raise ValueError(msg)
+        return v
 
     @field_validator("app_id")
     @classmethod
@@ -116,8 +192,8 @@ class DESFireAppConfig(BaseModel):
         if self.read_offset != 0:
             lines.append(f"{prefix}ReadOffset={self.read_offset}")
 
-        if self.diversification is True:
-            lines.append(f"{prefix}Diversification=1")
+        if self.diversification is not None:
+            lines.append(f"{prefix}Diversification={self.diversification}")
 
         if self.privacy_key_num is not None:
             lines.append(f"{prefix}PrivacyKeyNum={self.privacy_key_num}")

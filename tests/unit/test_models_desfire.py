@@ -191,11 +191,14 @@ class TestDESFireAppConfig:
             DESFireAppConfig(app_id="AABBCC", read_offset=256)
 
     def test_desfire_diversification(self) -> None:
-        """Can enable key diversification."""
+        """Can enable key diversification.
+
+        Mode 1 is AN10922 over UID and AID, the standard setting.
+        """
         from vtap100.models.desfire import DESFireAppConfig
 
-        config = DESFireAppConfig(app_id="AABBCC", diversification=True)
-        assert config.diversification is True
+        config = DESFireAppConfig(app_id="AABBCC", diversification=1)
+        assert config.diversification == 1
 
     def test_desfire_privacy_key(self) -> None:
         """Can set privacy key settings."""
@@ -494,3 +497,43 @@ class TestDESFireFileIdRange:
 
         with pytest.raises(ValidationError):
             DESFireAppConfig(app_id="AABBCC", file_id=256)
+
+
+class TestDiversificationBitField:
+    """Diversification is a bit field, not a switch.
+
+    Bit 0 enables AN10922, bit 1 omits the AID from the input, bit 2 reverses
+    UID byte order. Valid values are therefore 0, 1, 3, 5 and 7.
+    """
+
+    @pytest.mark.parametrize("value", [0, 1, 3, 5, 7])
+    def test_documented_values_are_accepted(self, value: int) -> None:
+        """Every documented mode is valid."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        config = DESFireAppConfig(app_id="AABBCC", diversification=value)
+        assert config.diversification == value
+
+    @pytest.mark.parametrize("value", [2, 4, 6])
+    def test_modifier_without_active_bit_is_rejected(self, value: int) -> None:
+        """A modifier bit without bit 0 means nothing."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        with pytest.raises(ValidationError):
+            DESFireAppConfig(app_id="AABBCC", diversification=value)
+
+    def test_out_of_range_is_rejected(self) -> None:
+        """Only three bits exist."""
+        from vtap100.models.desfire import DESFireAppConfig
+
+        with pytest.raises(ValidationError):
+            DESFireAppConfig(app_id="AABBCC", diversification=8)
+
+    def test_builder_composes_bits(self) -> None:
+        """The builder mirrors KBSourceBuilder for the other bitmask setting."""
+        from vtap100.models.desfire import DiversificationBuilder
+
+        assert DiversificationBuilder().active().build() == 1
+        assert DiversificationBuilder().active().omit_aid().build() == 3
+        assert DiversificationBuilder().active().reverse_uid().build() == 5
+        assert DiversificationBuilder().active().omit_aid().reverse_uid().build() == 7

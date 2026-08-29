@@ -98,7 +98,7 @@ class _DESFireAppParseData:
     format: int | None = None
     read_length: int = 3
     read_offset: int = 0
-    diversification: bool | None = None
+    diversification: int | None = None
     privacy_key_num: int | None = None
     privacy_key_slot: int | None = None
     sysid_key_slot: int | None = None
@@ -434,7 +434,7 @@ class ConfigParser:
 
         if match := self.DESFIRE_DIVERSIFICATION.match(line):
             slot = int(match.group(1))
-            self._get_desfire_app_data(slot).diversification = match.group(2) == "1"
+            self._get_desfire_app_data(slot).diversification = int(match.group(2))
             return True
 
         if match := self.DESFIRE_PRIVACY_KEY_NUM.match(line):

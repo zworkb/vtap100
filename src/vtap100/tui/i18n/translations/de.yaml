@@ -97,6 +97,9 @@ forms:
     read_offset: "Lese-Offset"
     read_offset_placeholder: "0-255 (Standard: 0)"
     diversification: "Diversifikation"
+    diversification_active: "Schlüssel-Diversifikation (AN10922)"
+    diversification_omit_aid: "AID nicht einbeziehen"
+    diversification_reverse_uid: "UID-Byte-Reihenfolge umkehren"
 
   # Keyboard form
   keyboard:
