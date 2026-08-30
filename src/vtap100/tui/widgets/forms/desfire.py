@@ -164,8 +164,12 @@ class DESFireConfigForm(BaseConfigForm):
         # Crypto Mode
         with Horizontal(classes="form-row"):
             yield Label(t("forms.desfire.crypto"))
+            # "Not set" and "no encryption" are different states: DESFireCryptoMode
+            # .NONE is 0, a value the file can state, and must not share an option
+            # with absence or the widget rejects a config carrying Crypto=0.
             crypto_options: list[tuple[str, DESFireCryptoMode | None]] = [
-                (t("forms.desfire.crypto_none"), None),
+                (t("common.labels.not_set"), None),
+                (t("forms.desfire.crypto_none"), DESFireCryptoMode.NONE),
                 (t("forms.desfire.crypto_3des"), DESFireCryptoMode.DES3),
                 (t("forms.desfire.crypto_aes"), DESFireCryptoMode.AES),
             ]
@@ -174,8 +178,10 @@ class DESFireConfigForm(BaseConfigForm):
         # Data Format
         with Horizontal(classes="form-row"):
             yield Label(t("forms.desfire.format"))
+            # Same as crypto: DESFireDataFormat.RAW is 0 and needs its own option.
             format_options: list[tuple[str, DESFireDataFormat | None]] = [
-                (t("forms.desfire.format_raw"), None),
+                (t("common.labels.not_set"), None),
+                (t("forms.desfire.format_raw"), DESFireDataFormat.RAW),
                 (t("forms.desfire.format_keyid_v1"), DESFireDataFormat.KEYID_V1),
                 (t("forms.desfire.format_keyid_v2"), DESFireDataFormat.KEYID_V2),
             ]
