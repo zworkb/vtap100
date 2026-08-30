@@ -76,13 +76,19 @@ fields:
     title: Prefix (KBPrefix)
     description: |
       Optional text before pass data.
-      Can contain ASCII-hex (%0A) or variables ($t).
+      Can contain ASCII-hex (%0A) or substitution tokens ($t, $n, $u, $s).
+      $t is the only way to tell Apple VAS, Google Smart Tap and Apple
+      Access apart in the output: prefix and postfix are otherwise global.
     format: |
       %XX = ASCII-hex (e.g. %0A for newline)
-      $t = Timestamp
-      $d = Date
-      $n = Sequence number
-    example: "$t|"
+      $t = Pass type: A=Apple VAS, G=Google Smart Tap, S=Samsung VAS,
+           X=Apple Access (iPhone), W=Apple Access (Watch), Q=Scanner,
+           0/2/4/6=card or tag, E=card emulation, H/M=mDL
+      $n = Merchant/collector index digit and key slot digit, used as $t$n
+      $u = UID as 8, 14 or 16 hex ASCII digits
+      $s = VTAP serial number
+      $$t = a literal "$t"
+    example: "$t$n:"
     tip: Leave empty if no prefix is needed.
 
   postfix:

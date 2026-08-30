@@ -271,3 +271,11 @@ PassErrorBeep=200,100,3,2000
 - [config.txt Format](overview.md)
 - [Apple VAS](apple_vas.md)
 - [Google Smart Tap](google_smarttap.md)
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [LED settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-LED-settings.htm)
+- [Control the LEDs or buzzer](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/Control-the-LEDs-or-buzzer.htm)

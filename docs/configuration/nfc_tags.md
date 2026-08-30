@@ -232,3 +232,10 @@ KBSource=24
 - [config.txt Format](overview.md)
 - [Keyboard Emulation](keyboard.md)
 - [MIFARE DESFire](desfire.md) *(Phase 4)*
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [NFC card or tag settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-Card-Tag-settings.htm)

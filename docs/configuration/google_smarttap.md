@@ -165,3 +165,10 @@ defaults = SmartTapDefaultPassesConfig(
 - [Apple VAS Configuration](apple_vas.md)
 - [Keyboard Emulation](keyboard.md)
 - [Reference Sources](../references/sources.md)
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [Google Smart Tap settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-ST-settings.htm)

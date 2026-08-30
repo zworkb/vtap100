@@ -76,13 +76,20 @@ fields:
     title: Präfix (KBPrefix)
     description: |
       Optionaler Text vor den Pass-Daten.
-      Kann ASCII-Hex (%0A) oder Variablen ($t) enthalten.
+      Kann ASCII-Hex (%0A) oder Platzhalter ($t, $n, $u, $s) enthalten.
+      $t ist die einzige Möglichkeit, Apple VAS, Google Smart Tap und
+      Apple Access in der Ausgabe zu unterscheiden — Präfix und Suffix
+      gelten sonst global.
     format: |
       %XX = ASCII-Hex (z.B. %0A für Zeilenumbruch)
-      $t = Zeitstempel
-      $d = Datum
-      $n = Sequenznummer
-    example: "$t|"
+      $t = Pass-Typ: A=Apple VAS, G=Google Smart Tap, S=Samsung VAS,
+           X=Apple Access (iPhone), W=Apple Access (Watch), Q=Scanner,
+           0/2/4/6=Karte oder Tag, E=Card Emulation, H/M=mDL
+      $n = Ziffer für Merchant-/Collector-Index und Ziffer für Key-Slot, als $t$n
+      $u = UID als 8, 14 oder 16 Hex-ASCII-Zeichen
+      $s = VTAP-Seriennummer
+      $$t = ein literales "$t"
+    example: "$t$n:"
     tip: Leer lassen wenn kein Präfix benötigt wird.
 
   postfix:

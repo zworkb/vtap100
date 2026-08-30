@@ -98,3 +98,10 @@ except ValidationError as e:
 
 - [VTAP Help - Apple VAS Settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-VAS_settings.htm)
 - [Passmeister - Apple Wallet Setup](https://www.passmeister.com/en/b/nfc_setup_dot_origin_vtap100_apple_wallet)
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [Apple VAS settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-VAS_settings.htm)

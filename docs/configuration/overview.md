@@ -112,3 +112,11 @@ Key slot 0 means automatic selection.
 - [Google Smart Tap Configuration](google_smarttap.md)
 - [Keyboard Emulation](keyboard.md)
 - [Upload to Reader](../deployment/upload_to_reader.md)
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [Default config.txt](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/VTAPConfig-txt.htm)
+- [Sample config.txt](https://www.vtapnfc.com/downloads/config.txt)

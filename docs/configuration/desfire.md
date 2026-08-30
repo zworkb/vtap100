@@ -251,3 +251,11 @@ KBSource=D1
 - [config.txt Format](overview.md)
 - [Keyboard Emulation](keyboard.md)
 - [NFC Tags](nfc_tags.md)
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [MIFARE DESFire and Apple Access settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-DESFire-settings.htm)
+- [Access using Apple Wallet settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-Access-settings.htm)

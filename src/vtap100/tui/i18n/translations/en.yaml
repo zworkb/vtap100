@@ -113,7 +113,7 @@ forms:
     source_card_tag_uid: "Card/Tag UID"
     source_hex_value: "KBSource = {value}"
     prefix: "Prefix (KBPrefix)"
-    prefix_placeholder: "e.g. $t for timestamp"
+    prefix_placeholder: "e.g. $t$n: for pass type and slot"
     postfix: "Suffix (KBPostfix)"
     postfix_placeholder: "%0A (newline)"
     delay_ms: "Delay in ms (KBDelayMS)"
@@ -262,13 +262,14 @@ _help_content:
         title: "Prefix (KBPrefix)"
         description: |
           Optional text before pass data.
-          Can contain ASCII-Hex (%0A) or variables ($t).
+          Can contain ASCII-Hex (%0A) or substitution tokens ($t, $n, $u, $s).
         format: |
           %XX = ASCII-Hex (e.g. %0A for newline)
-          $t = Timestamp
-          $d = Date
-          $n = Sequence number
-        example: "$t|"
+          $t = Pass type: A=Apple VAS, G=Google Smart Tap, X=Apple Access
+          $n = Merchant/collector index and key slot digit, used as $t$n
+          $u = UID as hex ASCII digits
+          $s = VTAP serial number
+        example: "$t$n:"
         tip: "Leave empty if no prefix needed."
 
       postfix:

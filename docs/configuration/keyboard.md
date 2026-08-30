@@ -68,14 +68,41 @@ KBEnable=0    ; USB keyboard disabled
 Optional: Output prefix before the data.
 
 ```ini
-KBPrefix=$t          ; Timestamp as prefix
+KBPrefix=$t$n:       ; Pass type and slot, e.g. "A22:"
 KBPrefix=%0A         ; Newline as prefix
 KBPrefix=ID:         ; Fixed text as prefix
 ```
 
-**Variables:**
-- `$t` - Current timestamp
-- `%XX` - ASCII hex character (e.g., `%0A` = newline)
+**Substitution tokens** ([manufacturer documentation](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-KB-settings.htm)):
+
+| Token | Expands to |
+|-------|------------|
+| `$t` | Pass type character — see the table below |
+| `$n` | Merchant/collector index digit (1-6) and key slot digit (1-6). Used together as `$t$n` |
+| `$u` | UID as 8, 14 or 16 hex ASCII digits |
+| `$s` | VTAP serial number |
+| `$$t` | A literal `$t`, not substituted |
+| `%XX` | ASCII hex character, e.g. `%0A` = newline |
+
+**Pass type characters** for `$t` ([manufacturer documentation](https://help.vtapnfc.com/en/Content/VTAP-Commands/Dynamic-config-commands.htm)):
+
+| Character | Source |
+|-----------|--------|
+| `A` | Apple VAS pass |
+| `G` | Google Smart Tap pass |
+| `S` | Samsung VAS pass |
+| `X` | Apple Access / ECP2 on iPhone |
+| `W` | Apple Access / ECP2 on Apple Watch |
+| `0` / `2` / `4` / `6` | MIFARE / NFC type 2 / type 4 / type 5 card or tag |
+| `E` | Card emulation |
+| `H` / `M` | mDL handover / mDL data |
+| `Q` | Scanner input |
+
+`$t` matters more than it looks: `KBPrefix`, `KBPostfix` and the payload
+extraction settings are **global**, so there is no way to define a different
+output format per source. Emitting the pass type and letting the receiving
+system branch on it is the only mechanism the reader offers for distinguishing
+Apple VAS from Google Smart Tap from Apple Access in the output.
 
 ### KBPostfix
 
@@ -178,7 +205,7 @@ from vtap100.models.keyboard import KeyboardConfig
 kb = KeyboardConfig(
     log_mode=True,
     source="81",            # Mobile Pass + UID
-    prefix="$t:",           # Timestamp as prefix
+    prefix="$t$n:",         # Pass type and slot, e.g. "A22:"
     postfix="%0D%0A",       # CRLF instead of LF
     delay_ms=50,            # Slower output
     pass_mode=True,         # Payload extraction
@@ -293,3 +320,11 @@ KBSource=01
 - [config.txt Format](overview.md)
 - [Apple VAS Configuration](apple_vas.md)
 - [Google Smart Tap Configuration](google_smarttap.md)
+
+## Manufacturer Documentation
+
+The authority for every value range on this page. Where this project's
+documentation disagreed with these, the manufacturer won.
+
+- [Keyboard/barcode emulation settings](https://help.vtapnfc.com/en/Content/VTAP-Commands/Config-txt-KB-settings.htm)
+- [Pass type characters](https://help.vtapnfc.com/en/Content/VTAP-Commands/Dynamic-config-commands.htm)

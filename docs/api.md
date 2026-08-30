@@ -59,7 +59,7 @@ from vtap100.models.keyboard import KeyboardConfig, KBSourceBuilder
 kb = KeyboardConfig(
     log_mode=True,       # enable keyboard output
     source="81",         # hex bitmask (0x80=mobile pass, 0x01=UID)
-    prefix="$t",         # optional prefix ($t=timestamp)
+    prefix="$t$n:",      # optional prefix ($t=pass type, $n=slot digits)
     postfix="%0A",       # suffix (default=newline)
     delay_ms=5,          # keystroke delay 5-255ms
 )
