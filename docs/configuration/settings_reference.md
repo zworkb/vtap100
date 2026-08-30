@@ -206,6 +206,26 @@ Apple VAS, Google Smart Tap and Apple Access from one configuration file.
 `ComPortSource` uses the same bitmask as `KBSource`; see the KBSource section
 above for the bit meanings.
 
+## Minimum Firmware Versions
+
+A VTAP reader **silently ignores settings its firmware does not know**. There is
+no error and nothing to see in the file, so a setting that has no effect looks
+exactly like one that is misconfigured.
+
+| Setting | Requires core firmware |
+|---------|------------------------|
+| `DESFire#ReadOffset` | v2.3.0.2 (Jun 2025) |
+| `$s` prefix/postfix token | v2.4.0.9 (Sep 2025) |
+| `ECP2Mode` | v2.5.3.0 (Aug 2026) |
+| `DESFire#Diversification` | v2.2.4.0 (Apr 2024) |
+
+Everything else this tool generates predates v2.2.4.0.
+
+Check the running version in `BOOT.TXT` on the reader's mass storage device, or
+send `?b` over the serial interface. The full history is in the
+[release notes](https://www.vtapnfc.com/downloads/VTAP_Release_Notes.pdf); updating is described under
+[Update firmware](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/Update-firmware.htm), with images at [Downloads](https://www.vtapnfc.com/support/downloads/).
+
 ## Manufacturer Documentation
 
 The authority for every value range on this page. Where this project's

@@ -60,6 +60,17 @@ manufacturer's own published sample lost 11 of its 19.
 - **A pre-commit hook** rejecting real deployment identifiers and key material
   in committed fixtures.
 
+### Documented
+
+- **Minimum firmware versions.** A VTAP reader silently ignores settings its
+  firmware does not know — no error, nothing wrong with the file, and changing
+  the value changes nothing. Diagnosed on a reader running v2.2.8.2 where
+  `DESFire#ReadOffset` had no effect at any value, because that setting arrived
+  in v2.3.0.2. `settings_reference.md` now carries a table of the settings this
+  tool generates that need firmware newer than v2.2.4.0, `desfire.md` states the
+  requirement where the setting is described, and `troubleshooting.md` explains
+  how to recognise the symptom and read the version from `BOOT.TXT`.
+
 ### Changed — breaking
 
 The package is `1.0.0b6` and classified `Development Status :: 3 - Alpha`.

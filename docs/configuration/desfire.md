@@ -85,6 +85,11 @@ DESFire1ReadLength=16
 
 ### DESFire#ReadOffset
 
+> **Requires core firmware v2.3.0.2 or later.** Older firmware ignores this
+> setting silently — no error, no warning, and the generated `config.txt` looks
+> correct. Check your version in `BOOT.TXT` on the reader's mass storage.
+> See [release notes](https://www.vtapnfc.com/downloads/VTAP_Release_Notes.pdf) and [Update firmware](https://help.vtapnfc.com/en/Content/VTAP-Configuration-Guide/Update-firmware.htm).
+
 Start offset in file (0-255, default: 0).
 
 ```ini
